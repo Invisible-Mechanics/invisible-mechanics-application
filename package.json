@@ -1,19 +1,39 @@
 {
-  "name": "invisible-mechanics-application",
+  "name": "im-liveclass-web",
   "version": "0.1.0",
   "private": true,
-  "description": "Split launcher for the Invisible Mechanics Next.js frontend and FastAPI backend.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
-    "dev:backend": "cd backend && .venv\\Scripts\\uvicorn.exe app.main:app --host 0.0.0.0 --port 8001",
-    "dev:web": "npm --prefix inv-mech run dev:next",
-    "build:web": "npm --prefix inv-mech run build",
-    "start:web": "npm --prefix inv-mech run start",
-    "start:backend": "cd backend && .venv\\Scripts\\uvicorn.exe app.main:app --host 0.0.0.0 --port 8001",
-    "start:prod": "concurrently --kill-others-on-fail --names \"backend,web\" --prefix-colors \"blue,green\" \"npm:start:backend\" \"npm:start:web\"",
-    "test:backend": "cd backend && .venv\\Scripts\\pytest.exe"
+    "dev": "next dev",
+    "dev:next": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.46.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "jose": "^5.10.0",
+    "lucide-react": "^0.460.0",
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.5.4",
+    "tus-js-client": "^4.3.1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.15.0",
+    "eslint-config-next": "^15.0.3",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3"
   }
 }

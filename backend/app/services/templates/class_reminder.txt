@@ -1,8 +1,0 @@
-Your lecture starts in about an hour.
-
-{title}
-{start_local} · {duration_min} minutes
-
-Join here: {join_url}
-
-— Invisible Mechanics
