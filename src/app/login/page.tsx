@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 import { LoginForm } from "./LoginForm";
 
 type LoginPageProps = {
-  searchParams?: Promise<{ next?: string }> | { next?: string };
+  searchParams?: Promise<{ next?: string }>;
 };
 
 function safeNext(value: string | undefined): string {
