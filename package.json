@@ -1,0 +1,19 @@
+{
+  "name": "invisible-mechanics-application",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Split launcher for the Invisible Mechanics Next.js frontend and FastAPI backend.",
+  "scripts": {
+    "dev": "powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1",
+    "dev:backend": "cd backend && .venv\\Scripts\\uvicorn.exe app.main:app --host 0.0.0.0 --port 8001",
+    "dev:web": "npm --prefix inv-mech run dev:next",
+    "build:web": "npm --prefix inv-mech run build",
+    "start:web": "npm --prefix inv-mech run start",
+    "start:backend": "cd backend && .venv\\Scripts\\uvicorn.exe app.main:app --host 0.0.0.0 --port 8001",
+    "start:prod": "concurrently --kill-others-on-fail --names \"backend,web\" --prefix-colors \"blue,green\" \"npm:start:backend\" \"npm:start:web\"",
+    "test:backend": "cd backend && .venv\\Scripts\\pytest.exe"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
