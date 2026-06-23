@@ -11,22 +11,29 @@ export type VerifyResponse = {
   next: string | null;
 };
 
-/** Ask the backend to email a magic link + 6-digit code. Always resolves ok=true. */
-export async function requestLogin(email: string, next?: string): Promise<void> {
+export type LoginIdentifier =
+  | { kind: "email"; email: string }
+  | { kind: "phone"; phone: string };
+
+/** Ask the backend to send a magic link/email code or SMS OTP. Always resolves ok=true. */
+export async function requestLogin(identifier: LoginIdentifier, next?: string): Promise<void> {
   const r = await fetch(`${API_URL}/auth/request`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, next }),
+    body: JSON.stringify({ ...identifierPayload(identifier), next }),
   });
   if (!r.ok) throw new Error(`request failed: ${r.status}`);
 }
 
 /** Verify a 6-digit code against the backend; on success, persists the cookie. */
-export async function verifyCode(email: string, code: string): Promise<VerifyResponse> {
+export async function verifyCode(
+  identifier: LoginIdentifier,
+  code: string,
+): Promise<VerifyResponse> {
   const r = await fetch(`${API_URL}/auth/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, code }),
+    body: JSON.stringify({ ...identifierPayload(identifier), code }),
   });
   if (!r.ok) {
     const body = await r.json().catch(() => ({}));
@@ -35,6 +42,12 @@ export async function verifyCode(email: string, code: string): Promise<VerifyRes
   const data = (await r.json()) as VerifyResponse;
   await persistSession(data.access_token, data.expires_at);
   return data;
+}
+
+function identifierPayload(identifier: LoginIdentifier): { email: string } | { phone: string } {
+  return identifier.kind === "email"
+    ? { email: identifier.email }
+    : { phone: identifier.phone };
 }
 
 /** Persist the JWT in a same-origin cookie our middleware + api-client read. */
