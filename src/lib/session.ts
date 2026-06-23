@@ -7,6 +7,8 @@ import { SESSION_COOKIE_NAME } from "@/lib/session-constants";
 export type Session = {
   userId: string;
   email: string;
+  name: string | null;
+  phone: string | null;
   role: string;
   raw: string;
 };
@@ -31,9 +33,11 @@ export async function verifySessionToken(raw: string): Promise<Session | null> {
     const { payload } = await jwtVerify(raw, SECRET_BYTES, { algorithms: ["HS256"] });
     const sub = typeof payload.sub === "string" ? payload.sub : null;
     const email = typeof payload.email === "string" ? payload.email : null;
+    const name = typeof payload.name === "string" ? payload.name : null;
+    const phone = typeof payload.phone === "string" ? payload.phone : null;
     const role = typeof payload.role === "string" ? payload.role : "student";
     if (!sub || !email) return null;
-    return { userId: sub, email, role, raw };
+    return { userId: sub, email, name, phone, role, raw };
   } catch {
     return null;
   }

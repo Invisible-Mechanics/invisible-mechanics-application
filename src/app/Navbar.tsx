@@ -26,15 +26,19 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           Invisible Mechanics
         </Link>
         <div className="flex items-center gap-6 text-sm">
-          <Link href="/schedule" className="text-ink/70 transition-colors hover:text-brand-600">
-            Schedule
-          </Link>
-          <Link href="/library" className="text-ink/70 transition-colors hover:text-brand-600">
-            Library
-          </Link>
-          <Link href="/cohorts" className="text-ink/70 transition-colors hover:text-brand-600">
-            Cohorts
-          </Link>
+          {user && (
+            <>
+              <Link href="/schedule" className="text-ink/70 transition-colors hover:text-brand-600">
+                Schedule
+              </Link>
+              <Link href="/library" className="text-ink/70 transition-colors hover:text-brand-600">
+                Library
+              </Link>
+              <Link href="/cohorts" className="text-ink/70 transition-colors hover:text-brand-600">
+                Cohorts
+              </Link>
+            </>
+          )}
           {isAdmin && (
             <Link href="/admin" className="text-ink/70 transition-colors hover:text-brand-600">
               Admin

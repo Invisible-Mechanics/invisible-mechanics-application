@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { StreamPlayback } from "@/lib/api-client";
+import { readSessionIdentity } from "@/lib/auth-client";
 
 type State =
   | { kind: "loading" }
@@ -24,6 +25,10 @@ export function RecordingPlayer({
   emptyText?: string;
 }) {
   const [state, setState] = useState<State>({ kind: "loading" });
+  const watermark = useMemo(() => {
+    const identity = readSessionIdentity();
+    return [identity?.name, identity?.phone ?? identity?.email].filter(Boolean).join(" | ");
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -42,18 +47,38 @@ export function RecordingPlayer({
   }, [fetchPlayback]);
 
   if (state.kind === "loading") {
-    return <p className="text-sm text-ink/60">Loading recording…</p>;
+    return <p className="text-sm text-ink/60">Loading recording...</p>;
   }
   if (state.kind === "none") {
     return <p className="text-sm text-ink/60">{emptyText}</p>;
   }
   if (state.kind === "error") {
+    if (state.message === "unauthenticated") {
+      const next =
+        typeof window === "undefined"
+          ? "/schedule"
+          : `${window.location.pathname}${window.location.search}`;
+      return (
+        <div className="rounded-lg border border-line bg-white p-5">
+          <p className="text-sm font-medium text-ink">Log in to watch this video</p>
+          <p className="mt-1 text-sm text-ink/60">
+            Your session is required before playback can start.
+          </p>
+          <a
+            href={`/login?next=${encodeURIComponent(next)}`}
+            className="btn-primary mt-4 inline-flex px-4 py-2 text-sm"
+          >
+            Log in
+          </a>
+        </div>
+      );
+    }
     return <p className="text-sm text-red-600">{state.message}</p>;
   }
   return (
     <div className="space-y-2">
       <h2 className="text-sm font-medium">{label}</h2>
-      <div className="aspect-video w-full overflow-hidden rounded-xl border border-line">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-line bg-black">
         <iframe
           src={state.playback.iframe_url}
           title={label}
@@ -61,6 +86,13 @@ export function RecordingPlayer({
           allowFullScreen
           className="h-full w-full"
         />
+        {watermark && (
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="video-watermark rounded bg-black/30 px-3 py-1 text-xs font-medium text-white/70 shadow">
+              {watermark}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

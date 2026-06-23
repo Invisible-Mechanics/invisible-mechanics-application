@@ -70,3 +70,24 @@ export function readSessionToken(): string | null {
   }
   return null;
 }
+
+export type SessionIdentity = {
+  email: string | null;
+  phone: string | null;
+  name: string | null;
+};
+
+export function readSessionIdentity(): SessionIdentity | null {
+  const token = readSessionToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
+    return {
+      email: typeof payload.email === "string" ? payload.email : null,
+      phone: typeof payload.phone === "string" ? payload.phone : null,
+      name: typeof payload.name === "string" ? payload.name : null,
+    };
+  } catch {
+    return null;
+  }
+}

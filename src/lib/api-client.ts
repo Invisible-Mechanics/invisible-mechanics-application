@@ -172,6 +172,7 @@ export async function deleteRecording(classId: string): Promise<void> {
 /** Returns short-lived signed Stream playback URLs, or null if no recording yet. */
 export async function getRecordingPlayback(classId: string): Promise<StreamPlayback | null> {
   const r = await authedFetch(`/classes/${classId}/recording`, { method: "GET" });
+  if (r.status === 401) throw new Error("unauthenticated");
   if (r.status === 404) return null;
   if (r.status === 403) throw new Error("not entitled");
   if (!r.ok) throw new Error(`getRecordingPlayback failed: ${r.status}`);
@@ -217,6 +218,7 @@ export async function getRecordedLecturePlayback(
   lectureId: string,
 ): Promise<StreamPlayback | null> {
   const r = await authedFetch(`/lectures/${lectureId}/playback`, { method: "GET" });
+  if (r.status === 401) throw new Error("unauthenticated");
   if (r.status === 404) return null;
   if (r.status === 403) throw new Error("not entitled");
   if (!r.ok) throw new Error(`getRecordedLecturePlayback failed: ${r.status}`);
