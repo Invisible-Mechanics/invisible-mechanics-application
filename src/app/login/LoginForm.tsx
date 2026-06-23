@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { LoaderModal } from "@/components/LoaderModal";
 import { LoginIdentifier, requestLogin, verifyCode } from "@/lib/auth-client";
 
 type LoginMode = "email" | "phone";
@@ -9,7 +10,6 @@ type LoginStep = "identifier" | "code";
 
 export function LoginForm() {
   const params = useSearchParams();
-  const router = useRouter();
   const next = params.get("next") ?? "/schedule";
 
   const [step, setStep] = useState<LoginStep>("identifier");
@@ -47,11 +47,9 @@ export function LoginForm() {
     try {
       const res = await verifyCode(currentIdentifier(), code);
       const dest = res.next ?? next;
-      router.push(dest);
-      router.refresh();
+      window.location.assign(dest);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code.");
-    } finally {
       setLoading(false);
     }
   }
@@ -63,6 +61,7 @@ export function LoginForm() {
   if (step === "code") {
     return (
       <form onSubmit={onVerify} className="space-y-4">
+        {loading && <LoaderModal label="Verifying OTP" />}
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
           <p className="font-medium text-emerald-900">
             {mode === "email" ? "Check your inbox" : "Check your phone"}
@@ -103,6 +102,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onRequest} className="space-y-4">
+      {loading && <LoaderModal label="Sending OTP" />}
       <div className="grid grid-cols-2 gap-2 rounded-lg bg-zinc-100 p-1">
         <button
           type="button"

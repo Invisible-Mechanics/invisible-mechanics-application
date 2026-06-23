@@ -1,7 +1,23 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 import { LoginForm } from "./LoginForm";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Promise<{ next?: string }> | { next?: string };
+};
+
+function safeNext(value: string | undefined): string {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/schedule";
+  return value;
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const session = await getSession();
+  const params = await searchParams;
+  const next = safeNext(params?.next);
+  if (session) redirect(next);
+
   return (
     <div className="mx-auto max-w-sm space-y-6 py-10">
       <h1 className="text-3xl font-semibold tracking-tight">Log in</h1>
