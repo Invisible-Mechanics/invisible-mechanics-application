@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { LoaderModal } from "@/components/LoaderModal";
-import { LoginIdentifier, requestLogin, verifyCode } from "@/lib/auth-client";
+import { LoginIdentifier, readSessionToken, requestLogin, verifyCode } from "@/lib/auth-client";
 
 type LoginMode = "email" | "phone";
 type LoginStep = "identifier" | "code";
@@ -19,6 +19,12 @@ export function LoginForm() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (readSessionToken()) {
+      window.location.replace(next);
+    }
+  }, [next]);
 
   function currentIdentifier(): LoginIdentifier {
     return mode === "email"

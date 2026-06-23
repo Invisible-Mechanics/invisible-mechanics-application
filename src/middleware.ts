@@ -29,7 +29,19 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const needsAuth = PROTECTED_PREFIXES.some((p) => path.startsWith(p));
   const isAdmin = path.startsWith(ADMIN_PREFIX);
-  if (!needsAuth) return NextResponse.next();
+  if (!needsAuth) {
+    if (path === "/login") {
+      const session = await readSession(request);
+      if (session) {
+        const url = request.nextUrl.clone();
+        const next = url.searchParams.get("next");
+        url.pathname = next && next.startsWith("/") && !next.startsWith("//") ? next : "/schedule";
+        url.search = "";
+        return NextResponse.redirect(url);
+      }
+    }
+    return NextResponse.next();
+  }
 
   const session = await readSession(request);
   if (!session) {
