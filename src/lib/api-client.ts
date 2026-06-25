@@ -124,10 +124,13 @@ export async function getMe(): Promise<UserProfile> {
   return r.json();
 }
 
-export async function requestPhoneOtp(phone: string): Promise<{ dev_code: string | null }> {
-  const r = await authedFetch(`/me/phone/request-otp`, {
+export async function requestContactOtp(payload: {
+  email?: string;
+  phone?: string;
+}): Promise<{ ok: true }> {
+  const r = await authedFetch(`/me/contact/request-otp`, {
     method: "POST",
-    body: JSON.stringify({ phone }),
+    body: JSON.stringify(payload),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));
@@ -136,10 +139,14 @@ export async function requestPhoneOtp(phone: string): Promise<{ dev_code: string
   return r.json();
 }
 
-export async function verifyPhoneOtp(phone: string, code: string): Promise<UserProfile> {
-  const r = await authedFetch(`/me/phone/verify-otp`, {
+export async function verifyContactOtp(payload: {
+  email?: string;
+  phone?: string;
+  code: string;
+}): Promise<ProfileUpdateResponse> {
+  const r = await authedFetch(`/me/contact/verify-otp`, {
     method: "POST",
-    body: JSON.stringify({ phone, code }),
+    body: JSON.stringify(payload),
   });
   if (!r.ok) {
     const data = await r.json().catch(() => ({}));

@@ -5,17 +5,29 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { persistSession } from "@/lib/auth-client";
 import {
   getMe,
-  requestPhoneOtp,
+  requestContactOtp,
   updateProfile,
-  verifyPhoneOtp,
+  verifyContactOtp,
 } from "@/lib/api-client";
+import type { UserProfile } from "@/lib/api";
 import { OtpField } from "@/components/OtpField";
 import { PhoneField } from "@/components/PhoneField";
 import { site } from "@/lib/site";
 
-type Step = "phone" | "profile";
+type Step = "contact" | "profile";
+type ContactKind = "email" | "phone";
 type Exam = "jee" | "neet";
 type Grade = "11" | "12" | "dropper";
+
+const PHONE_EMAIL_DOMAIN = "@phone.invisiblemechanics.com";
+
+function needsEmail(profile: UserProfile): boolean {
+  return profile.email.endsWith(PHONE_EMAIL_DOMAIN);
+}
+
+function needsPhone(profile: UserProfile): boolean {
+  return !profile.phone;
+}
 
 export function OnboardingWizard() {
   const router = useRouter();
@@ -24,12 +36,13 @@ export function OnboardingWizard() {
   const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
 
   const [ready, setReady] = useState(false);
-  const [step, setStep] = useState<Step>("phone");
-  const [phoneStage, setPhoneStage] = useState<"enter" | "code">("enter");
+  const [step, setStep] = useState<Step>("profile");
+  const [contactKind, setContactKind] = useState<ContactKind>("phone");
+  const [contactStage, setContactStage] = useState<"enter" | "code">("enter");
 
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [devCode, setDevCode] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [exam, setExam] = useState<Exam | null>(null);
   const [grade, setGrade] = useState<Grade | null>(null);
@@ -48,7 +61,16 @@ export function OnboardingWizard() {
         if (me.target_exam) setExam(me.target_exam);
         if (me.grade) setGrade(me.grade);
         if (me.terms_accepted_at) setAlreadyConsented(true);
-        setStep(me.phone ? "profile" : "phone");
+
+        if (needsEmail(me)) {
+          setContactKind("email");
+          setStep("contact");
+        } else if (needsPhone(me)) {
+          setContactKind("phone");
+          setStep("contact");
+        } else {
+          setStep("profile");
+        }
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -57,14 +79,15 @@ export function OnboardingWizard() {
     };
   }, []);
 
-  async function sendPhoneCode(e: React.FormEvent) {
+  async function sendContactCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      const res = await requestPhoneOtp(phone);
-      setDevCode(res.dev_code);
-      setPhoneStage("code");
+      await requestContactOtp(
+        contactKind === "email" ? { email: email.trim() } : { phone },
+      );
+      setContactStage("code");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code.");
     } finally {
@@ -72,13 +95,18 @@ export function OnboardingWizard() {
     }
   }
 
-  async function confirmPhone(e: React.FormEvent) {
+  async function confirmContact(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      await verifyPhoneOtp(phone, code);
+      const res = await verifyContactOtp(
+        contactKind === "email" ? { email: email.trim(), code } : { phone, code },
+      );
+      await persistSession(res.access_token, res.expires_at);
       setStep("profile");
+      setCode("");
+      setContactStage("enter");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code.");
     } finally {
@@ -112,46 +140,62 @@ export function OnboardingWizard() {
 
   if (!ready) return <p className="text-sm text-ink/50">Loading...</p>;
 
-  const stepNo = step === "phone" ? 1 : 2;
+  const stepNo = step === "contact" ? 1 : 2;
 
   return (
     <div className="card space-y-5 p-5">
       <StepHeader current={stepNo} />
 
-      {step === "phone" ? (
-        phoneStage === "enter" ? (
-          <form onSubmit={sendPhoneCode} className="space-y-4">
-            <label className="block text-sm font-medium">Your mobile number</label>
-            <PhoneField value={phone} onChange={setPhone} autoFocus />
-            <button disabled={busy || phone.length !== 10} className="btn-primary w-full px-4 py-2">
+      {step === "contact" ? (
+        contactStage === "enter" ? (
+          <form onSubmit={sendContactCode} className="space-y-4">
+            {contactKind === "email" ? (
+              <>
+                <label className="block text-sm font-medium">Your email address</label>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  className="field-input"
+                  autoFocus
+                />
+              </>
+            ) : (
+              <>
+                <label className="block text-sm font-medium">Your mobile number</label>
+                <PhoneField value={phone} onChange={setPhone} autoFocus />
+              </>
+            )}
+            <button disabled={busy || !canSend(contactKind, email, phone)} className="btn-primary w-full px-4 py-2">
               {busy ? "Sending..." : "Send code"}
             </button>
             {error && <p className="text-sm text-red-600">{error}</p>}
           </form>
         ) : (
-          <form onSubmit={confirmPhone} className="space-y-4">
+          <form onSubmit={confirmContact} className="space-y-4">
             <p className="text-sm text-ink/70">
-              Enter the 6-digit code sent to <span className="font-medium">+91 {phone}</span>.
+              Enter the 6-digit code sent to{" "}
+              <span className="font-medium">
+                {contactKind === "email" ? email.trim() : `+91 ${phone}`}
+              </span>
+              .
             </p>
             <OtpField value={code} onChange={setCode} disabled={busy} autoFocus />
-            {devCode && (
-              <p className="rounded-md bg-amber-50 px-3 py-2 text-center text-xs text-amber-700">
-                Dev mode - your code is <span className="font-mono font-semibold">{devCode}</span>
-              </p>
-            )}
             <button disabled={busy || code.length !== 6} className="btn-primary w-full px-4 py-2">
-              {busy ? "Verifying..." : "Verify number"}
+              {busy ? "Verifying..." : contactKind === "email" ? "Verify email" : "Verify number"}
             </button>
             <button
               type="button"
               onClick={() => {
-                setPhoneStage("enter");
+                setContactStage("enter");
                 setCode("");
                 setError(null);
               }}
               className="block text-xs text-ink/60 underline"
             >
-              Use a different number
+              Use a different {contactKind === "email" ? "email" : "number"}
             </button>
             {error && <p className="text-sm text-red-600">{error}</p>}
           </form>
@@ -227,6 +271,10 @@ export function OnboardingWizard() {
       )}
     </div>
   );
+}
+
+function canSend(kind: ContactKind, email: string, phone: string): boolean {
+  return kind === "email" ? email.trim().includes("@") : phone.length === 10;
 }
 
 function StepHeader({ current }: { current: number }) {
