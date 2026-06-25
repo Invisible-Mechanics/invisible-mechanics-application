@@ -131,6 +131,7 @@ export type ProfileUpdateResponse = {
 };
 
 export async function updateProfile(payload: {
+  email?: string;
   name?: string;
   target_exam?: "jee" | "neet";
   grade?: "11" | "12" | "dropper";

@@ -10,6 +10,7 @@ type Exam = "jee" | "neet";
 type Grade = "11" | "12" | "dropper";
 
 const CONSENT_VERSION = "25 June 2026";
+const PHONE_EMAIL_DOMAIN = "@phone.invisiblemechanics.com";
 
 export function StudentDetailsForm({
   profile,
@@ -21,6 +22,8 @@ export function StudentDetailsForm({
   redirectTo?: string;
 }) {
   const router = useRouter();
+  const hasPlaceholderEmail = profile.email.endsWith(PHONE_EMAIL_DOMAIN);
+  const [email, setEmail] = useState(hasPlaceholderEmail ? "" : profile.email);
   const [name, setName] = useState(profile.name ?? "");
   const [exam, setExam] = useState<Exam | null>(profile.target_exam);
   const [grade, setGrade] = useState<Grade | null>(profile.grade);
@@ -30,7 +33,9 @@ export function StudentDetailsForm({
   const [error, setError] = useState<string | null>(null);
 
   const alreadyConsented = Boolean(profile.terms_accepted_at);
-  const canSave = Boolean(name.trim() && exam && grade && (alreadyConsented || agreed));
+  const canSave = Boolean(
+    email.trim() && name.trim() && exam && grade && (alreadyConsented || agreed),
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +45,7 @@ export function StudentDetailsForm({
     setMessage(null);
     try {
       const res = await updateProfile({
+        ...(hasPlaceholderEmail ? { email: email.trim() } : {}),
         name: name.trim(),
         target_exam: exam,
         grade,
@@ -63,6 +69,27 @@ export function StudentDetailsForm({
 
   return (
     <form onSubmit={onSubmit} className="card max-w-xl space-y-5 p-5">
+      <div className="grid gap-1.5">
+        <label className="text-sm font-medium" htmlFor="student-email">
+          Email
+        </label>
+        <input
+          id="student-email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          className="field-input"
+          disabled={!hasPlaceholderEmail}
+        />
+        {hasPlaceholderEmail ? (
+          <p className="text-xs text-ink/50">Add your real email for account records.</p>
+        ) : (
+          <p className="text-xs text-ink/50">Email is linked to this account.</p>
+        )}
+      </div>
+
       <div className="grid gap-1.5">
         <label className="text-sm font-medium" htmlFor="student-name">
           Full name
@@ -104,7 +131,7 @@ export function StudentDetailsForm({
       <div className="rounded-md border border-line bg-white p-3 text-sm text-ink/70">
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <span className="text-ink/50">Email</span>
-          <span>{profile.email}</span>
+          <span>{hasPlaceholderEmail ? "Not added" : profile.email}</span>
           <span className="text-ink/50">Mobile</span>
           <span>{profile.phone ?? "Not added"}</span>
         </div>
