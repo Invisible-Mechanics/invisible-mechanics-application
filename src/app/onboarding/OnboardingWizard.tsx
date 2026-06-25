@@ -48,6 +48,8 @@ export function OnboardingWizard() {
   const [grade, setGrade] = useState<Grade | null>(null);
   const [agreed, setAgreed] = useState(false);
   const [alreadyConsented, setAlreadyConsented] = useState(false);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [readConsent, setReadConsent] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -114,10 +116,22 @@ export function OnboardingWizard() {
     }
   }
 
-  async function finish(e: React.FormEvent) {
+  function startFinish(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !exam || !grade) return;
-    if (!alreadyConsented && !agreed) return;
+    if (!alreadyConsented) {
+      setError(null);
+      setAgreed(false);
+      setReadConsent(false);
+      setShowConsentModal(true);
+      return;
+    }
+    void finish();
+  }
+
+  async function finish() {
+    if (!name.trim() || !exam || !grade) return;
+    if (!alreadyConsented && (!agreed || !readConsent)) return;
     setError(null);
     setBusy(true);
     try {
@@ -201,7 +215,7 @@ export function OnboardingWizard() {
           </form>
         )
       ) : (
-        <form onSubmit={finish} className="space-y-5">
+        <form onSubmit={startFinish} className="space-y-5">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium">Full name</label>
             <input
@@ -238,37 +252,126 @@ export function OnboardingWizard() {
             />
           </div>
 
-          {!alreadyConsented && (
-            <label className="flex items-start gap-2 text-sm text-ink/70">
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0"
-              />
-              <span>
-                I agree to the{" "}
-                <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">
-                  Privacy Policy
-                </a>
-                .
-              </span>
-            </label>
-          )}
-
           <button
-            disabled={busy || !name.trim() || !exam || !grade || (!alreadyConsented && !agreed)}
+            disabled={busy || !name.trim() || !exam || !grade}
             className="btn-primary w-full px-4 py-2"
           >
-            {busy ? "Saving..." : "Finish & enter"}
+            {busy ? "Saving..." : alreadyConsented ? "Finish & enter" : "Continue"}
           </button>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </form>
       )}
+
+      {showConsentModal && (
+        <ConsentModal
+          agreed={agreed}
+          busy={busy}
+          readConsent={readConsent}
+          onAgreedChange={setAgreed}
+          onReadConsent={() => setReadConsent(true)}
+          onSubmit={finish}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConsentModal({
+  agreed,
+  busy,
+  readConsent,
+  onAgreedChange,
+  onReadConsent,
+  onSubmit,
+}: {
+  agreed: boolean;
+  busy: boolean;
+  readConsent: boolean;
+  onAgreedChange: (value: boolean) => void;
+  onReadConsent: () => void;
+  onSubmit: () => void;
+}) {
+  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 12) {
+      onReadConsent();
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl">
+        <div className="border-b border-line px-5 py-4">
+          <h2 className="text-xl font-semibold tracking-tight">Privacy Policy & Terms</h2>
+          <p className="mt-1 text-sm text-ink/60">
+            Read the policy, then accept to finish setting up your account.
+          </p>
+        </div>
+
+        <div
+          onScroll={handleScroll}
+          className="max-h-[58vh] space-y-4 overflow-y-auto px-5 py-4 text-sm leading-6 text-ink/75"
+        >
+          <p>
+            Invisible Mechanics collects the account details needed to run the learning platform:
+            name, email address, mobile number, target exam, class, purchases, entitlements, and
+            learning activity such as class joins and recording access.
+          </p>
+          <p>
+            We use this data to authenticate you, verify your contact details, provide access to
+            purchased content, process payments, send OTPs and service messages, prevent abuse, and
+            improve the learning experience.
+          </p>
+          <p>
+            Payment data is processed through Razorpay. We store order and payment identifiers, but
+            we do not see or store card, UPI, or bank credentials.
+          </p>
+          <p>
+            We may use service providers such as Supabase, Render/Vercel, Cloudflare, Razorpay,
+            Resend, and MSG91 to operate the platform. They process data only to provide their
+            services to us.
+          </p>
+          <p>
+            If you are under 18, your parent or guardian must consent to your use of the platform.
+            We do not use personal data of minors for targeted advertising.
+          </p>
+          <p>
+            You may request correction, withdrawal of consent, or deletion where legally allowed.
+            Some records may be retained for payments, security, tax, or legal compliance.
+          </p>
+          <p>
+            By accepting, you agree to the Terms of Service and Privacy Policy, and consent to the
+            processing of your personal data for the purposes described above.
+          </p>
+          <p>
+            Support and grievance requests can be sent to support@invisiblemechanics.com.
+          </p>
+        </div>
+
+        <div className="space-y-4 border-t border-line px-5 py-4">
+          {!readConsent && (
+            <p className="text-xs font-medium text-ink/50">
+              Scroll to the bottom of the policy to continue.
+            </p>
+          )}
+          {readConsent && (
+            <label className="flex items-start gap-2 text-sm text-ink/70">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => onAgreedChange(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0"
+              />
+              <span>I accept the Terms of Service and Privacy Policy.</span>
+            </label>
+          )}
+          {readConsent && agreed && (
+            <button disabled={busy} onClick={onSubmit} className="btn-primary w-full px-4 py-2">
+              {busy ? "Saving..." : "Save and continue"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
