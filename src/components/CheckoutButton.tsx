@@ -4,12 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { readSessionToken } from "@/lib/auth-client";
-import { createCohortOrder, createClassOrder } from "@/lib/api-client";
+import {
+  createCohortOrder,
+  createClassOrder,
+  createRecordedLectureOrder,
+} from "@/lib/api-client";
 
-type Kind = "cohort" | "class";
+type Kind = "cohort" | "class" | "recorded_lecture";
 
 /**
- * Razorpay one-time checkout for either a cohort enrollment or a single class.
+ * Razorpay one-time checkout for cohort, class, or recorded video access.
  * Server pages pass only serializable props (kind + id); the button itself
  * picks the right order endpoint and login redirect.
  */
@@ -27,8 +31,14 @@ export function CheckoutButton({
   const [scriptReady, setScriptReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loginNext = `/${kind === "cohort" ? "cohorts" : "classes"}/${id}`;
-  const createOrder = kind === "cohort" ? createCohortOrder : createClassOrder;
+  const loginNext =
+    kind === "cohort" ? `/cohorts/${id}` : kind === "class" ? `/classes/${id}` : `/library/${id}`;
+  const createOrder =
+    kind === "cohort"
+      ? createCohortOrder
+      : kind === "class"
+        ? createClassOrder
+        : createRecordedLectureOrder;
 
   async function onClick() {
     setError(null);
@@ -53,7 +63,12 @@ export function CheckoutButton({
         amount: order.amount,
         currency: order.currency,
         name: order.title,
-        description: kind === "cohort" ? "Cohort enrollment" : "Lecture purchase",
+        description:
+          kind === "cohort"
+            ? "Cohort enrollment"
+            : kind === "class"
+              ? "Lecture purchase"
+              : "Video purchase",
         prefill: {
           name: order.prefill_name ?? undefined,
           email: order.prefill_email ?? undefined,

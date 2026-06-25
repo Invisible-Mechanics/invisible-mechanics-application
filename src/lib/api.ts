@@ -73,7 +73,7 @@ export type RecordedLectureOut = {
 
 export type EntitlementOut = {
   id: string;
-  scope_type: "class" | "cohort" | "all_access";
+  scope_type: "class" | "cohort" | "recorded_lecture" | "all_access";
   scope_id: string | null;
   source: string;
   valid_until: string | null;

@@ -117,6 +117,18 @@ export async function createClassOrder(classId: string): Promise<CreateOrderResp
   return r.json();
 }
 
+export async function createRecordedLectureOrder(
+  lectureId: string,
+): Promise<CreateOrderResponse> {
+  const r = await authedFetch(`/enrollments/lectures/${lectureId}/order`, {
+    method: "POST",
+  });
+  if (r.status === 401) throw new Error("unauthenticated");
+  if (r.status === 409) throw new Error((await r.json()).detail ?? "cannot purchase");
+  if (!r.ok) throw new Error(`createRecordedLectureOrder failed: ${r.status}`);
+  return r.json();
+}
+
 export async function verifyPayment(body: {
   razorpay_order_id: string;
   razorpay_payment_id: string;

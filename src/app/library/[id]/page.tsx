@@ -40,13 +40,14 @@ export default async function LectureDetailPage({
     // not logged in → no entitlements
   }
 
-  // Recorded lectures grant via cohort or all-access only — there's no
-  // per-lecture entitlement scope at this phase.
+  // Recorded lectures can be unlocked directly, through their cohort/course,
+  // or through a future all-access entitlement.
   const isEntitled =
     lec.access_type === "free" ||
     entitlements.some(
       (e) =>
         e.scope_type === "all_access" ||
+        (e.scope_type === "recorded_lecture" && e.scope_id === lec.id) ||
         (e.scope_type === "cohort" && e.scope_id === lec.cohort_id),
     );
 
@@ -92,14 +93,20 @@ export default async function LectureDetailPage({
         {!isEntitled ? (
           <div className="max-w-xs space-y-3">
             {lec.price_single && (
-              <p className="text-sm text-ink/70">Cohort access · ₹{lec.price_single}</p>
+              <CheckoutButton
+                kind="recorded_lecture"
+                id={lec.id}
+                label={`Buy this video - Rs ${lec.price_single}`}
+              />
             )}
             <CheckoutButton
               kind="cohort"
               id={lec.cohort_id}
-              label="Enroll in cohort"
+              label="Buy complete course"
             />
-            <p className="text-xs text-ink/60">Enroll in the cohort to unlock this lecture.</p>
+            <p className="text-xs text-ink/60">
+              Buy this video only, or unlock the full course with cohort access.
+            </p>
           </div>
         ) : (
           <LectureRecordingPlayer lectureId={lec.id} />
