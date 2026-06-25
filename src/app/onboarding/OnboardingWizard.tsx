@@ -43,6 +43,7 @@ export function OnboardingWizard() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
+  const [devCode, setDevCode] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [exam, setExam] = useState<Exam | null>(null);
   const [grade, setGrade] = useState<Grade | null>(null);
@@ -86,9 +87,10 @@ export function OnboardingWizard() {
     setError(null);
     setBusy(true);
     try {
-      await requestContactOtp(
+      const res = await requestContactOtp(
         contactKind === "email" ? { email: email.trim() } : { phone },
       );
+      setDevCode(res.dev_code);
       setContactStage("code");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code.");
@@ -108,6 +110,7 @@ export function OnboardingWizard() {
       await persistSession(res.access_token, res.expires_at);
       setStep("profile");
       setCode("");
+      setDevCode(null);
       setContactStage("enter");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code.");
@@ -144,10 +147,13 @@ export function OnboardingWizard() {
           : { accept_terms: true, consent_version: site.policy.legalLastUpdated }),
       });
       await persistSession(res.access_token, res.expires_at);
-      router.push(next);
-      router.refresh();
+      window.location.assign(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save your details.");
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setError("Save timed out. Check that the backend is running, then try again.");
+      } else {
+        setError(err instanceof Error ? err.message : "Could not save your details.");
+      }
       setBusy(false);
     }
   }
@@ -197,6 +203,11 @@ export function OnboardingWizard() {
               .
             </p>
             <OtpField value={code} onChange={setCode} disabled={busy} autoFocus />
+            {devCode && (
+              <p className="rounded-md bg-amber-50 px-3 py-2 text-center text-xs text-amber-700">
+                Dev mode - your code is <span className="font-mono font-semibold">{devCode}</span>
+              </p>
+            )}
             <button disabled={busy || code.length !== 6} className="btn-primary w-full px-4 py-2">
               {busy ? "Verifying..." : contactKind === "email" ? "Verify email" : "Verify number"}
             </button>
@@ -267,6 +278,7 @@ export function OnboardingWizard() {
           agreed={agreed}
           busy={busy}
           readConsent={readConsent}
+          error={error}
           onAgreedChange={setAgreed}
           onReadConsent={() => setReadConsent(true)}
           onSubmit={finish}
@@ -280,6 +292,7 @@ function ConsentModal({
   agreed,
   busy,
   readConsent,
+  error,
   onAgreedChange,
   onReadConsent,
   onSubmit,
@@ -287,6 +300,7 @@ function ConsentModal({
   agreed: boolean;
   busy: boolean;
   readConsent: boolean;
+  error: string | null;
   onAgreedChange: (value: boolean) => void;
   onReadConsent: () => void;
   onSubmit: () => void;
@@ -370,6 +384,7 @@ function ConsentModal({
               {busy ? "Saving..." : "Save and continue"}
             </button>
           )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
       </div>
     </div>

@@ -13,6 +13,20 @@ async function authedFetch(path: string, init: RequestInit = {}): Promise<Respon
   return fetch(`${API_URL}${path}`, { ...init, headers });
 }
 
+async function authedFetchWithTimeout(
+  path: string,
+  init: RequestInit = {},
+  timeoutMs = 20000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await authedFetch(path, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 export async function joinClass(id: string): Promise<JoinResponse> {
   const r = await authedFetch(`/classes/${id}/join`, { method: "POST" });
   if (r.status === 403) throw new Error("not entitled");
@@ -127,8 +141,8 @@ export async function getMe(): Promise<UserProfile> {
 export async function requestContactOtp(payload: {
   email?: string;
   phone?: string;
-}): Promise<{ ok: true }> {
-  const r = await authedFetch(`/me/contact/request-otp`, {
+}): Promise<{ ok: true; dev_code: string | null }> {
+  const r = await authedFetchWithTimeout(`/me/contact/request-otp`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -144,7 +158,7 @@ export async function verifyContactOtp(payload: {
   phone?: string;
   code: string;
 }): Promise<ProfileUpdateResponse> {
-  const r = await authedFetch(`/me/contact/verify-otp`, {
+  const r = await authedFetchWithTimeout(`/me/contact/verify-otp`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -170,7 +184,7 @@ export async function updateProfile(payload: {
   accept_terms?: boolean;
   consent_version?: string;
 }): Promise<ProfileUpdateResponse> {
-  const r = await authedFetch(`/me`, {
+  const r = await authedFetchWithTimeout(`/me`, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
