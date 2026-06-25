@@ -53,7 +53,11 @@ export function LoginForm() {
     try {
       const res = await verifyCode(currentIdentifier(), code);
       const dest = res.next ?? next;
-      window.location.assign(dest);
+      const needsOnboarding =
+        !res.user.name || !res.user.target_exam || !res.user.grade || !res.user.terms_accepted_at;
+      window.location.assign(
+        needsOnboarding ? `/onboarding?next=${encodeURIComponent(dest)}` : dest,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code.");
       setLoading(false);

@@ -1,28 +1,40 @@
+import { StudentDetailsForm } from "@/app/account/StudentDetailsForm";
+import { ApiError, getMe } from "@/lib/api";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const session = await getSession();
+  let profile = null;
+  try {
+    profile = session ? await getMe() : null;
+  } catch (e) {
+    if (!(e instanceof ApiError && e.kind === "unauthenticated")) throw e;
+  }
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
         <dt className="text-ink/60">Email</dt>
-        <dd>{session?.email ?? "—"}</dd>
+        <dd>{profile?.email ?? session?.email ?? "-"}</dd>
+        <dt className="text-ink/60">Mobile</dt>
+        <dd>{profile?.phone ?? session?.phone ?? "-"}</dd>
         <dt className="text-ink/60">User ID</dt>
-        <dd className="font-mono text-xs">{session?.userId ?? "—"}</dd>
+        <dd className="font-mono text-xs">{session?.userId ?? "-"}</dd>
         <dt className="text-ink/60">Role</dt>
-        <dd>{session?.role ?? "—"}</dd>
+        <dd>{profile?.role ?? session?.role ?? "-"}</dd>
       </dl>
 
-      <section className="space-y-2 pt-6">
-        <h2 className="text-xl font-medium">Billing</h2>
-        <p className="text-sm text-ink/60">
-          Subscriptions and cohort enrollments land in Phase 1/2. Nothing to show yet.
-        </p>
-      </section>
+      {profile ? (
+        <section className="space-y-3 pt-2">
+          <h2 className="text-xl font-medium">Student details</h2>
+          <StudentDetailsForm profile={profile} />
+        </section>
+      ) : (
+        <p className="text-sm text-ink/60">Log in to manage your student details.</p>
+      )}
 
       <form action="/auth/signout" method="post">
         <button className="text-sm text-red-700 transition-colors hover:text-red-800 hover:underline">

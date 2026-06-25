@@ -7,7 +7,16 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8001";
 export type VerifyResponse = {
   access_token: string;
   expires_at: string;
-  user: { id: string; email: string; name: string | null; phone: string | null; role: string };
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+    phone: string | null;
+    role: string;
+    target_exam?: "jee" | "neet" | null;
+    grade?: "11" | "12" | "dropper" | null;
+    terms_accepted_at?: string | null;
+  };
   next: string | null;
 };
 
@@ -51,7 +60,7 @@ function identifierPayload(identifier: LoginIdentifier): { email: string } | { p
 }
 
 /** Persist the JWT in a same-origin cookie our middleware + api-client read. */
-async function persistSession(accessToken: string, expiresAt: string): Promise<void> {
+export async function persistSession(accessToken: string, expiresAt: string): Promise<void> {
   const r = await fetch(`/api/session`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

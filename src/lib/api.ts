@@ -80,6 +80,18 @@ export type EntitlementOut = {
   status: "active" | "revoked";
 };
 
+export type UserProfile = {
+  id: string;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  role: string;
+  target_exam: "jee" | "neet" | null;
+  grade: "11" | "12" | "dropper" | null;
+  terms_accepted_at: string | null;
+  consent_version: string | null;
+};
+
 export type JoinResponse = {
   hls_url: string;
   dash_url: string;
@@ -139,6 +151,11 @@ export async function listCohortClasses(id: string): Promise<ClassOut[]> {
 
 export async function listMyEntitlements(): Promise<EntitlementOut[]> {
   const r = await authedFetch(`/me/entitlements`);
+  return r.json();
+}
+
+export async function getMe(): Promise<UserProfile> {
+  const r = await authedFetch(`/me`);
   return r.json();
 }
 
