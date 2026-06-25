@@ -1,0 +1,19 @@
+.focusIn {
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .focusIn {
+    animation: focus-in 1s ease-out both;
+  }
+
+  @keyframes focus-in {
+    from {
+      filter: blur(8px);
+      opacity: 0.6;
+    }
+    to {
+      filter: blur(0);
+      opacity: 1;
+    }
+  }
+}

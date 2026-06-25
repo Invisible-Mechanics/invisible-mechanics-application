@@ -124,10 +124,35 @@ export async function getMe(): Promise<UserProfile> {
   return r.json();
 }
 
+export async function requestPhoneOtp(phone: string): Promise<{ dev_code: string | null }> {
+  const r = await authedFetch(`/me/phone/request-otp`, {
+    method: "POST",
+    body: JSON.stringify({ phone }),
+  });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.detail ?? "could not send the code");
+  }
+  return r.json();
+}
+
+export async function verifyPhoneOtp(phone: string, code: string): Promise<UserProfile> {
+  const r = await authedFetch(`/me/phone/verify-otp`, {
+    method: "POST",
+    body: JSON.stringify({ phone, code }),
+  });
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}));
+    throw new Error(data.detail ?? "invalid code");
+  }
+  return r.json();
+}
+
 export type ProfileUpdateResponse = {
   user: UserProfile;
   access_token: string;
   expires_at: string;
+  onboarded?: boolean;
 };
 
 export async function updateProfile(payload: {

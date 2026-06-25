@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const PROTECTED_PREFIXES = ["/schedule", "/classes", "/cohorts", "/library", "/account", "/admin"];
+const PROTECTED_PREFIXES = ["/schedule", "/classes", "/library", "/account", "/admin", "/onboarding"];
 const ADMIN_PREFIX = "/admin";
+const ONBOARDING_PATH = "/onboarding";
 const SESSION_COOKIE_NAME = "im_session";
 
 // Re-encode per request — middleware doesn't share module-scope state reliably
@@ -12,14 +13,23 @@ function secretBytes(): Uint8Array | null {
   return s ? new TextEncoder().encode(s) : null;
 }
 
-async function readSession(request: NextRequest): Promise<{ role: string } | null> {
+async function readSession(
+  request: NextRequest,
+): Promise<{ role: string; onboarded: boolean } | null> {
   const raw = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const secret = secretBytes();
   if (!raw || !secret) return null;
   try {
     const { payload } = await jwtVerify(raw, secret, { algorithms: ["HS256"] });
     const role = typeof payload.role === "string" ? payload.role : "student";
-    return { role };
+    const name = typeof payload.name === "string" ? payload.name : null;
+    const targetExam = typeof payload.target_exam === "string" ? payload.target_exam : null;
+    const grade = typeof payload.grade === "string" ? payload.grade : null;
+    const termsAccepted = typeof payload.terms_accepted_at === "string" ? payload.terms_accepted_at : null;
+    const onboarded =
+      payload.onboarded === true ||
+      Boolean(name && targetExam && grade && (termsAccepted || payload.onboarded === true));
+    return { role, onboarded };
   } catch {
     return null;
   }
@@ -53,6 +63,12 @@ export async function middleware(request: NextRequest) {
   if (isAdmin && session.role !== "admin") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+  if (!session.onboarded && !path.startsWith(ONBOARDING_PATH)) {
+    const url = request.nextUrl.clone();
+    url.pathname = ONBOARDING_PATH;
+    url.searchParams.set("next", path);
     return NextResponse.redirect(url);
   }
   return NextResponse.next();

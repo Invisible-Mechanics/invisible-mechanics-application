@@ -10,6 +10,7 @@ export type Session = {
   name: string | null;
   phone: string | null;
   role: string;
+  onboarded: boolean;
   raw: string;
 };
 
@@ -36,8 +37,14 @@ export async function verifySessionToken(raw: string): Promise<Session | null> {
     const name = typeof payload.name === "string" ? payload.name : null;
     const phone = typeof payload.phone === "string" ? payload.phone : null;
     const role = typeof payload.role === "string" ? payload.role : "student";
+    const targetExam = typeof payload.target_exam === "string" ? payload.target_exam : null;
+    const grade = typeof payload.grade === "string" ? payload.grade : null;
+    const termsAccepted = typeof payload.terms_accepted_at === "string" ? payload.terms_accepted_at : null;
+    const onboarded =
+      payload.onboarded === true ||
+      Boolean(name && targetExam && grade && (termsAccepted || payload.onboarded === true));
     if (!sub || !email) return null;
-    return { userId: sub, email, name, phone, role, raw };
+    return { userId: sub, email, name, phone, role, onboarded, raw };
   } catch {
     return null;
   }

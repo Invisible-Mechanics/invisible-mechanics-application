@@ -71,6 +71,19 @@ export type RecordedLectureOut = {
   target_year: number | null;
 };
 
+export type ChapterOut = {
+  id: string;
+  title: string;
+  description: string | null;
+  subject: string | null;
+  thumbnail_url: string | null;
+  target_exam: "jee" | "neet" | null;
+  target_year: number | null;
+  order_index: number;
+  price: string | null;
+  status: "open" | "closed";
+};
+
 export type EntitlementOut = {
   id: string;
   scope_type: "class" | "cohort" | "recorded_lecture" | "all_access";
@@ -174,5 +187,10 @@ export async function listRecordedLectures(
 
 export async function getRecordedLecture(id: string): Promise<RecordedLectureOut> {
   const r = await authedFetch(`/lectures/${id}`);
+  return r.json();
+}
+
+export async function listChapters(): Promise<ChapterOut[]> {
+  const r = await authedFetch(`/chapters`);
   return r.json();
 }

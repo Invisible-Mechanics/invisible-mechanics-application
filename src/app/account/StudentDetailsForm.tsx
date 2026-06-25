@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { persistSession } from "@/lib/auth-client";
 import { updateProfile } from "@/lib/api-client";
 import type { UserProfile } from "@/lib/api";
+import { site } from "@/lib/site";
 
 type Exam = "jee" | "neet";
 type Grade = "11" | "12" | "dropper";
 
-const CONSENT_VERSION = "25 June 2026";
 const PHONE_EMAIL_DOMAIN = "@phone.invisiblemechanics.com";
 
 export function StudentDetailsForm({
@@ -51,7 +51,7 @@ export function StudentDetailsForm({
         grade,
         ...(alreadyConsented
           ? {}
-          : { accept_terms: true, consent_version: CONSENT_VERSION }),
+          : { accept_terms: true, consent_version: site.policy.legalLastUpdated }),
       });
       await persistSession(res.access_token, res.expires_at);
       setMessage("Saved.");
