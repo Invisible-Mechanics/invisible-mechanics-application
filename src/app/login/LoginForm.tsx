@@ -165,7 +165,7 @@ export function LoginForm() {
         {loading
           ? "Sending..."
           : mode === "email"
-            ? "Email me a sign-in link"
+            ? "Send OTP"
             : "Send OTP"}
       </button>
       {error && <p className="text-sm text-red-600">{error}</p>}

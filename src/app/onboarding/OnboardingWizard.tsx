@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { persistSession } from "@/lib/auth-client";
 import {
   getMe,
@@ -30,7 +30,6 @@ function needsPhone(profile: UserProfile): boolean {
 }
 
 export function OnboardingWizard() {
-  const router = useRouter();
   const params = useSearchParams();
   const nextParam = params.get("next") ?? "/";
   const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
@@ -108,10 +107,7 @@ export function OnboardingWizard() {
         contactKind === "email" ? { email: email.trim(), code } : { phone, code },
       );
       await persistSession(res.access_token, res.expires_at);
-      setStep("profile");
-      setCode("");
-      setDevCode(null);
-      setContactStage("enter");
+      window.location.replace(`/onboarding?next=${encodeURIComponent(next)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid code.");
     } finally {
@@ -305,6 +301,20 @@ function ConsentModal({
   onReadConsent: () => void;
   onSubmit: () => void;
 }) {
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const checkScrollable = () => {
+      const el = bodyRef.current;
+      if (!el || el.scrollHeight <= el.clientHeight + 12) {
+        onReadConsent();
+      }
+    };
+    checkScrollable();
+    window.addEventListener("resize", checkScrollable);
+    return () => window.removeEventListener("resize", checkScrollable);
+  }, [onReadConsent]);
+
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const el = e.currentTarget;
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 12) {
@@ -313,9 +323,9 @@ function ConsentModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl">
-        <div className="border-b border-line px-5 py-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 px-3 py-3 sm:items-center sm:px-4 sm:py-4">
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]">
+        <div className="shrink-0 border-b border-line px-4 py-3 sm:px-5 sm:py-4">
           <h2 className="text-xl font-semibold tracking-tight">Privacy Policy & Terms</h2>
           <p className="mt-1 text-sm text-ink/60">
             Read the policy, then accept to finish setting up your account.
@@ -323,8 +333,9 @@ function ConsentModal({
         </div>
 
         <div
+          ref={bodyRef}
           onScroll={handleScroll}
-          className="max-h-[58vh] space-y-4 overflow-y-auto px-5 py-4 text-sm leading-6 text-ink/75"
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 text-sm leading-6 text-ink/75 sm:px-5"
         >
           <p>
             Invisible Mechanics collects the account details needed to run the learning platform:
@@ -362,7 +373,7 @@ function ConsentModal({
           </p>
         </div>
 
-        <div className="space-y-4 border-t border-line px-5 py-4">
+        <div className="shrink-0 space-y-4 border-t border-line px-4 py-3 sm:px-5 sm:py-4">
           {!readConsent && (
             <p className="text-xs font-medium text-ink/50">
               Scroll to the bottom of the policy to continue.
