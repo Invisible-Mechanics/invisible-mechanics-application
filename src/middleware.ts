@@ -12,7 +12,23 @@ const PROTECTED_PREFIXES = [
 ];
 const ADMIN_PREFIX = "/admin";
 const ONBOARDING_PATH = "/onboarding";
+const MASTERCLASS_PATH = "/masterclass";
 const SESSION_COOKIE_NAME = "im_session";
+
+const STUDENT_APP_PREFIXES = [
+  "/schedule",
+  "/classes",
+  "/library",
+  "/cohorts",
+  "/account",
+];
+
+function masterclassMode(): boolean {
+  return (
+    process.env.MASTERCLASS_MODE === "true" ||
+    process.env.NEXT_PUBLIC_MASTERCLASS_MODE === "true"
+  );
+}
 
 // Re-encode per request — middleware doesn't share module-scope state reliably
 // in the edge runtime across deploys, and the cost is negligible.
@@ -47,13 +63,34 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const needsAuth = PROTECTED_PREFIXES.some((p) => path.startsWith(p));
   const isAdmin = path.startsWith(ADMIN_PREFIX);
+  if (masterclassMode() && STUDENT_APP_PREFIXES.some((p) => path.startsWith(p))) {
+    const session = await readSession(request);
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", MASTERCLASS_PATH);
+      return NextResponse.redirect(url);
+    }
+    if (session.role === "student") {
+      const url = request.nextUrl.clone();
+      url.pathname = session.onboarded ? MASTERCLASS_PATH : ONBOARDING_PATH;
+      url.search = "";
+      if (!session.onboarded) url.searchParams.set("next", MASTERCLASS_PATH);
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (!needsAuth) {
     if (path === "/login") {
       const session = await readSession(request);
       if (session) {
         const url = request.nextUrl.clone();
         const next = url.searchParams.get("next");
-        url.pathname = next && next.startsWith("/") && !next.startsWith("//") ? next : "/schedule";
+        if (masterclassMode() && session.role === "student") {
+          url.pathname = MASTERCLASS_PATH;
+        } else {
+          url.pathname = next && next.startsWith("/") && !next.startsWith("//") ? next : "/schedule";
+        }
         url.search = "";
         return NextResponse.redirect(url);
       }
@@ -77,6 +114,17 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = ONBOARDING_PATH;
     url.searchParams.set("next", path);
+    return NextResponse.redirect(url);
+  }
+  if (
+    masterclassMode() &&
+    session.role === "student" &&
+    session.onboarded &&
+    STUDENT_APP_PREFIXES.some((p) => path.startsWith(p))
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = MASTERCLASS_PATH;
+    url.search = "";
     return NextResponse.redirect(url);
   }
   return NextResponse.next();
