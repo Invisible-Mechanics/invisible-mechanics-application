@@ -44,7 +44,7 @@ export function OnboardingWizard() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [devCode, setDevCode] = useState<string | null>(null);
+  // const [devCode, setDevCode] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [exam, setExam] = useState<Exam | null>(null);
   const [grade, setGrade] = useState<Grade | null>(null);
@@ -88,10 +88,10 @@ export function OnboardingWizard() {
     setError(null);
     setBusy(true);
     try {
-      const res = await requestContactOtp(
+      await requestContactOtp(
         contactKind === "email" ? { email: email.trim() } : { phone },
       );
-      setDevCode(res.dev_code);
+      // setDevCode(res.dev_code);
       setContactStage("code");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code.");
@@ -202,11 +202,13 @@ export function OnboardingWizard() {
               .
             </p>
             <OtpField value={code} onChange={setCode} disabled={busy} autoFocus />
+            {/*
             {devCode && (
               <p className="rounded-md bg-amber-50 px-3 py-2 text-center text-xs text-amber-700">
                 Dev mode - your code is <span className="font-mono font-semibold">{devCode}</span>
               </p>
             )}
+            */}
             <button disabled={busy || code.length !== 6} className="btn-primary w-full px-4 py-2">
               {busy ? "Verifying..." : contactKind === "email" ? "Verify email" : "Verify number"}
             </button>
