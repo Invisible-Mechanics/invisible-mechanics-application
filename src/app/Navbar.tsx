@@ -15,10 +15,10 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
 
   return (
     <header className="border-b border-line">
-      <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+      <nav className="mx-auto flex max-w-5xl flex-nowrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <Link
           href={isMasterclassStudent ? masterclassPath : "/"}
-          className="flex min-w-0 items-center gap-2.5 text-base font-semibold tracking-tight sm:text-lg"
+          className="flex min-w-0 flex-1 items-center gap-2.5 text-base font-semibold tracking-tight sm:text-lg"
         >
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-ink">
             <Image
@@ -32,12 +32,8 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
           </span>
           <span className="truncate">Invisible Mechanics</span>
         </Link>
-        <div className="flex max-w-full flex-wrap items-center justify-end gap-x-4 gap-y-2 text-sm sm:gap-x-6">
-          {isMasterclassStudent ? (
-            <Link href={masterclassPath} className="text-ink/70 transition-colors hover:text-brand-600">
-              Masterclass
-            </Link>
-          ) : user && (
+        <div className="flex shrink-0 items-center justify-end gap-x-4 gap-y-2 text-sm sm:gap-x-6">
+          {!isMasterclassStudent && user && (
             <>
               <Link href="/schedule" className="text-ink/70 transition-colors hover:text-brand-600">
                 Schedule
