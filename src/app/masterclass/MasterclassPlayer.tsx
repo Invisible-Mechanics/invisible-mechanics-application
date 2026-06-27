@@ -9,35 +9,35 @@ export function MasterclassPlayer() {
 
   return (
     <>
-      <section className="relative left-1/2 min-h-[calc(100dvh-4rem)] w-screen -translate-x-1/2 overflow-hidden bg-zinc-950 text-white">
-        {imageOk ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={masterclassThumbnailPath}
-            alt="Masterclass"
-            onError={() => setImageOk(false)}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#2b2358,#08080b_65%)]" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/30 to-black/80" />
-        <div className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-5xl flex-col items-center justify-center px-6 text-center">
-          <button
-            type="button"
-            aria-label="Play masterclass"
-            onClick={() => setModalOpen(true)}
-            className="group inline-flex h-24 w-24 items-center justify-center rounded-full border border-white/35 bg-white/20 shadow-2xl backdrop-blur-md transition hover:scale-105 hover:bg-white/30 sm:h-32 sm:w-32"
-          >
-            <span className="ml-2 h-0 w-0 border-y-[18px] border-l-[28px] border-y-transparent border-l-white drop-shadow sm:border-y-[24px] sm:border-l-[38px]" />
-          </button>
-          <div className="mt-8 max-w-2xl space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-100">
-              Invisible Mechanics
-            </p>
-            <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
-              Masterclass
-            </h1>
+      <section className="relative left-1/2 flex min-h-[calc(100dvh-4rem)] w-screen -translate-x-1/2 items-center justify-center overflow-hidden bg-[#08080d] px-4 py-8 text-white sm:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(124,91,255,0.24),transparent_58%)]" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-brand-500/20 to-transparent" />
+        <div className="relative w-full max-w-6xl overflow-hidden rounded-xl border border-white/12 bg-black shadow-2xl">
+          <div className="relative aspect-[16/9] w-full">
+            {imageOk ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={masterclassThumbnailPath}
+                alt="Masterclass"
+                onError={() => setImageOk(false)}
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,#2b2358,#08080b_65%)] text-sm text-white/55">
+                Masterclass
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
+              <button
+                type="button"
+                aria-label="Play masterclass"
+                onClick={() => setModalOpen(true)}
+                className="group inline-flex h-20 w-20 items-center justify-center rounded-full border border-white/35 bg-black/35 shadow-2xl backdrop-blur-md transition hover:scale-105 hover:bg-black/45 sm:h-28 sm:w-28"
+              >
+                <span className="ml-1.5 h-0 w-0 border-y-[15px] border-l-[24px] border-y-transparent border-l-white drop-shadow sm:border-y-[21px] sm:border-l-[34px]" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -58,7 +58,7 @@ export function MasterclassPlayer() {
                 {"\uD83C\uDFAC"}
               </div>
               <p className="text-xl font-semibold tracking-tight sm:text-2xl">
-                🎬 Going Live on 6th July 2026 at 6:00 PM
+                {"\uD83C\uDFAC"} Going Live on 6th July 2026 at 6:00 PM
               </p>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { masterclassPath, masterclassThumbnailPath } from "@/lib/masterclass";
+import { trackMasterclassEnrollClick } from "@/lib/masterclass-tracking";
 
 export function MasterclassAdModal() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export function MasterclassAdModal() {
   if (!open) return null;
 
   function enroll() {
+    trackMasterclassEnrollClick("ad_modal");
     setOpen(false);
     router.push(loginPath);
   }

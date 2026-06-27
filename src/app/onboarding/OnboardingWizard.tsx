@@ -14,6 +14,7 @@ import { OtpField } from "@/components/OtpField";
 import { PhoneField } from "@/components/PhoneField";
 import { site } from "@/lib/site";
 import { masterclassMode, masterclassPath } from "@/lib/masterclass";
+import { trackMasterclassRegistrationCompleted } from "@/lib/masterclass-tracking";
 
 type Step = "contact" | "profile";
 type ContactKind = "email" | "phone";
@@ -144,6 +145,7 @@ export function OnboardingWizard() {
           : { accept_terms: true, consent_version: site.policy.legalLastUpdated }),
       });
       await persistSession(res.access_token, res.expires_at);
+      if (masterclassMode) trackMasterclassRegistrationCompleted("onboarding");
       window.location.assign(masterclassMode ? masterclassPath : next);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
