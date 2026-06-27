@@ -20,6 +20,7 @@ export function MasterclassPlayer() {
   const [modalOpen, setModalOpen] = useState(false);
   const [imageOk, setImageOk] = useState(true);
   const [remaining, setRemaining] = useState(() => LIVE_AT - Date.now());
+  const [enrolled, setEnrolled] = useState(false);
 
   useEffect(() => {
     const id = window.setInterval(() => setRemaining(LIVE_AT - Date.now()), 1000);
@@ -27,7 +28,9 @@ export function MasterclassPlayer() {
   }, []);
 
   useEffect(() => {
-    trackMasterclassEnrollmentConfirmed();
+    trackMasterclassEnrollmentConfirmed().then((ok) => {
+      if (ok) setEnrolled(true);
+    });
   }, []);
 
   return (
@@ -66,10 +69,13 @@ export function MasterclassPlayer() {
             </div>
             <button
               type="button"
-              onClick={() => setModalOpen(true)}
-              className="inline-flex w-full items-center justify-center rounded-lg bg-white px-5 py-3 text-base font-semibold text-zinc-950 shadow-lg transition hover:bg-brand-100"
+              onClick={() => {
+                if (!enrolled) setModalOpen(true);
+              }}
+              disabled={enrolled}
+              className="inline-flex w-full items-center justify-center rounded-lg bg-white px-5 py-3 text-base font-semibold text-zinc-950 shadow-lg transition hover:bg-brand-100 disabled:cursor-default disabled:bg-emerald-100 disabled:text-emerald-900"
             >
-              Enroll Masterclass Now
+              {enrolled ? "Enrolled" : "Enroll Now"}
             </button>
           </div>
         </div>
@@ -109,6 +115,11 @@ export function MasterclassPlayer() {
                 <p className="mt-1 text-[9px] leading-snug text-white/65 sm:text-[11px]">
                   Live on 6 July 2026, 6:00 PM IST
                 </p>
+                {enrolled && (
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200">
+                    Enrolled
+                  </p>
+                )}
               </div>
             </div>
           </div>

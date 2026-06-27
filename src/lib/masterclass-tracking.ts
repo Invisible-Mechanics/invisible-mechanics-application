@@ -21,11 +21,15 @@ type MasterclassEventType =
   | "registration_completed"
   | "enrollment_confirmed";
 
-async function postEvent(path: string, eventType: MasterclassEventType, source: string) {
+async function postEvent(
+  path: string,
+  eventType: MasterclassEventType,
+  source: string,
+): Promise<boolean> {
   const token = readSessionToken();
   const headers = new Headers({ "Content-Type": "application/json" });
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_URL}${path}`, {
     method: "POST",
     headers,
     keepalive: true,
@@ -36,6 +40,7 @@ async function postEvent(path: string, eventType: MasterclassEventType, source: 
       path: window.location.pathname,
     }),
   });
+  return response.ok;
 }
 
 export function trackMasterclassEnrollClick(source = "ad_modal"): void {
@@ -50,10 +55,12 @@ export function trackMasterclassRegistrationCompleted(source = "onboarding"): vo
   ).catch(() => {});
 }
 
-export function trackMasterclassEnrollmentConfirmed(source = "masterclass_page"): void {
-  postEvent(
+export function trackMasterclassEnrollmentConfirmed(
+  source = "masterclass_page",
+): Promise<boolean> {
+  return postEvent(
     "/masterclass/events/enrollment-confirmed",
     "enrollment_confirmed",
     source,
-  ).catch(() => {});
+  ).catch(() => false);
 }
