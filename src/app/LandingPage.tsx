@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { MasterclassAdModal } from "@/app/MasterclassAdModal";
 import { masterclassMode } from "@/lib/masterclass";
@@ -350,7 +351,18 @@ function LandingNav({ opaque }: { opaque: boolean }) {
 
   return (
     <nav className={`landing-nav ${opaque ? "opaque" : ""} ${masterclassMode ? "masterclass" : ""}`}>
-      <Link href="/" className="landing-logo">Invisible <span>Mechanics</span></Link>
+      <Link href="/" className="landing-logo">
+        <span className="landing-logo-mark">
+          <Image
+            src="/im-logo.png"
+            alt="Invisible Mechanics"
+            width={28}
+            height={28}
+            priority
+          />
+        </span>
+        <span>Invisible <strong>Mechanics</strong></span>
+      </Link>
       <div>
         {!masterclassMode && (
           <>

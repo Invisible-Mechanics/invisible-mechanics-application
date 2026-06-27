@@ -104,16 +104,37 @@ body.im-landing-shell main {
 }
 
 .landing-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
   font-size: 20px;
   font-weight: 800;
   color: white;
+}
+
+.landing-logo-mark {
+  display: inline-flex;
+  height: 36px;
+  width: 36px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #0d0d14;
+}
+
+.landing-logo-mark img {
+  height: 28px;
+  width: 28px;
+  border-radius: 6px;
 }
 
 .landing-nav.opaque .landing-logo {
   color: #0d0d14;
 }
 
-.landing-logo span,
+.landing-logo strong,
 .landing-nav a:hover,
 .landing-hero-copy h1 span,
 .landing-mock-section h2 span,
@@ -1074,6 +1095,11 @@ body.im-landing-shell main {
 
   .landing-logo {
     font-size: 16px;
+  }
+
+  .landing-logo-mark {
+    height: 34px;
+    width: 34px;
   }
 
   .landing-hero-copy {
