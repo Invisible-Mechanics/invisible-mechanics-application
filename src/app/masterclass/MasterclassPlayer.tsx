@@ -27,11 +27,11 @@ export function MasterclassPlayer() {
 
   return (
     <>
-      <section className="relative flex min-h-[calc(100dvh-4rem)] w-full items-center justify-center overflow-hidden rounded-xl bg-[#08080d] px-3 py-8 text-white sm:px-6">
+      <section className="relative flex min-h-[calc(100svh-4rem)] w-full items-center justify-center overflow-hidden rounded-xl bg-[#08080d] px-0 py-4 text-white sm:min-h-[calc(100dvh-4rem)] sm:px-6 sm:py-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(124,91,255,0.24),transparent_58%)]" />
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-brand-500/20 to-transparent" />
-        <div className="relative w-full max-w-5xl overflow-hidden rounded-xl border border-white/12 bg-black shadow-2xl">
-          <div className="relative aspect-[16/9] w-full">
+        <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/12 bg-black shadow-2xl sm:max-w-5xl">
+          <div className="relative aspect-[9/14] w-full sm:aspect-[16/9]">
             {imageOk ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -46,23 +46,23 @@ export function MasterclassPlayer() {
               </div>
             )}
             <div className="absolute inset-0 bg-black/10" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-4 text-center">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-3 text-center sm:gap-5 sm:px-4">
               <button
                 type="button"
                 aria-label="Play masterclass"
                 onClick={() => setModalOpen(true)}
-                className="group inline-flex h-20 w-20 items-center justify-center rounded-full border border-white/35 bg-black/35 shadow-2xl backdrop-blur-md transition hover:scale-105 hover:bg-black/45 sm:h-28 sm:w-28"
+                className="group inline-flex h-16 w-16 items-center justify-center rounded-full border border-white/35 bg-black/35 shadow-2xl backdrop-blur-md transition hover:scale-105 hover:bg-black/45 sm:h-28 sm:w-28"
               >
-                <span className="ml-1.5 h-0 w-0 border-y-[15px] border-l-[24px] border-y-transparent border-l-white drop-shadow sm:border-y-[21px] sm:border-l-[34px]" />
+                <span className="ml-1 h-0 w-0 border-y-[12px] border-l-[19px] border-y-transparent border-l-white drop-shadow sm:ml-1.5 sm:border-y-[21px] sm:border-l-[34px]" />
               </button>
-              <div className="rounded-full border border-white/20 bg-black/45 px-4 py-2 text-white shadow-xl backdrop-blur-md sm:px-5 sm:py-2.5">
+              <div className="max-w-[calc(100%-1rem)] rounded-2xl border border-white/20 bg-black/50 px-3 py-2 text-white shadow-xl backdrop-blur-md sm:rounded-full sm:px-5 sm:py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/60">
                   Starts in
                 </p>
-                <p className="mt-0.5 text-sm font-semibold tabular-nums sm:text-base">
+                <p className="mt-0.5 whitespace-nowrap text-xs font-semibold tabular-nums sm:text-base">
                   {formatCountdown(remaining)}
                 </p>
-                <p className="mt-1 text-[11px] text-white/65">
+                <p className="mt-1 text-[10px] leading-snug text-white/65 sm:text-[11px]">
                   Live on 6 July 2026, 6:00 PM IST
                 </p>
               </div>

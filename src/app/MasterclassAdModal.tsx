@@ -24,21 +24,12 @@ export function MasterclassAdModal() {
 
   function enroll() {
     trackMasterclassEnrollClick("ad_modal");
-    setOpen(false);
     router.push(loginPath);
   }
 
   return (
     <div className="masterclass-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 py-6 backdrop-blur-sm">
       <div className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-white/15 bg-zinc-950 text-white shadow-2xl">
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={() => setOpen(false)}
-          className="absolute right-3 top-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-xl leading-none text-white/80 transition hover:bg-white/15 hover:text-white"
-        >
-          x
-        </button>
         <div className="relative">
           {imageOk ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -69,7 +60,7 @@ export function MasterclassAdModal() {
             onClick={enroll}
             className="inline-flex w-full items-center justify-center rounded-md bg-white px-6 py-3 text-base font-semibold text-zinc-950 transition hover:bg-brand-100 sm:w-auto"
           >
-            Enroll Now
+            Enroll Masterclass Now
           </button>
         </div>
       </div>

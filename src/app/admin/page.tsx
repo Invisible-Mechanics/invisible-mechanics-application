@@ -27,12 +27,12 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex items-end justify-between">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
           <p className="text-sm text-ink/60">Schedule and manage live lectures.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/users" className="btn-secondary px-4 py-2 text-sm">
             Manage users
           </Link>
@@ -64,7 +64,7 @@ export default async function AdminPage() {
               {classes.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+                  className="flex flex-col gap-3 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     {c.thumbnail_url && (

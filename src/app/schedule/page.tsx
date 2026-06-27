@@ -84,9 +84,9 @@ function Section({
 function ClassRow({ c }: { c: ClassOut }) {
   return (
     <li>
-      <Link href={`/classes/${c.id}`} className="card flex gap-4 p-3">
+      <Link href={`/classes/${c.id}`} className="card flex flex-col gap-3 p-3 sm:flex-row sm:gap-4">
         <Thumbnail src={c.thumbnail_url} title={c.title} />
-        <div className="flex flex-1 flex-col justify-between py-1">
+        <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
           <div className="space-y-1">
             <div className="font-medium leading-snug">{c.title}</div>
             <div className="text-xs text-ink/60">
@@ -107,7 +107,7 @@ function ClassRow({ c }: { c: ClassOut }) {
 function Thumbnail({ src, title }: { src: string | null; title: string }) {
   if (!src) {
     return (
-      <div className="flex h-20 w-32 shrink-0 items-center justify-center rounded bg-gradient-to-br from-black/5 to-black/15 text-xs uppercase tracking-wider text-black/40">
+      <div className="flex aspect-video w-full items-center justify-center rounded bg-gradient-to-br from-black/5 to-black/15 text-xs uppercase tracking-wider text-black/40 sm:h-20 sm:w-32 sm:shrink-0">
         Live
       </div>
     );
@@ -118,7 +118,7 @@ function Thumbnail({ src, title }: { src: string | null; title: string }) {
       src={src}
       alt={title}
       loading="lazy"
-      className="h-20 w-32 shrink-0 rounded object-cover"
+      className="aspect-video w-full rounded object-cover sm:h-20 sm:w-32 sm:shrink-0"
     />
   );
 }

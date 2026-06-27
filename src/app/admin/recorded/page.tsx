@@ -17,7 +17,7 @@ export default async function AdminRecordedPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex items-end justify-between">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Link href="/admin" className="text-xs text-black/60 hover:underline">
             ← Back to admin
@@ -47,7 +47,7 @@ export default async function AdminRecordedPage() {
               {lectures.map((lec) => (
                 <li
                   key={lec.id}
-                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+                  className="flex flex-col gap-3 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     {lec.thumbnail_url && (

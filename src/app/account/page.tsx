@@ -16,13 +16,13 @@ export default async function AccountPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm sm:gap-x-6">
         <dt className="text-ink/60">Email</dt>
-        <dd>{profile?.email ?? session?.email ?? "-"}</dd>
+        <dd className="min-w-0 break-words">{profile?.email ?? session?.email ?? "-"}</dd>
         <dt className="text-ink/60">Mobile</dt>
-        <dd>{profile?.phone ?? session?.phone ?? "-"}</dd>
+        <dd className="min-w-0 break-words">{profile?.phone ?? session?.phone ?? "-"}</dd>
         <dt className="text-ink/60">User ID</dt>
-        <dd className="font-mono text-xs">{session?.userId ?? "-"}</dd>
+        <dd className="min-w-0 break-all font-mono text-xs">{session?.userId ?? "-"}</dd>
         <dt className="text-ink/60">Role</dt>
         <dd>{profile?.role ?? session?.role ?? "-"}</dd>
       </dl>

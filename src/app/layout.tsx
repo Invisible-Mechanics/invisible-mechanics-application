@@ -33,8 +33,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={sans.variable}>
       <body>
         <Navbar user={navUser} />
-        <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
-        <footer className="mx-auto mt-10 max-w-5xl space-y-3 border-t border-line px-6 py-10 text-xs text-ink/50">
+        <main className="mx-auto w-full max-w-5xl overflow-x-hidden px-4 py-6 sm:px-6 sm:py-10">{children}</main>
+        <footer className="mx-auto mt-8 w-full max-w-5xl space-y-3 border-t border-line px-4 py-8 text-xs text-ink/50 sm:mt-10 sm:px-6 sm:py-10">
           <nav className="flex flex-wrap gap-x-5 gap-y-2">
             <Link href="/terms" className="hover:text-ink/80">
               Terms of Service

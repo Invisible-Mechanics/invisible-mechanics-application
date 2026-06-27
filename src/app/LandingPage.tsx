@@ -93,12 +93,13 @@ export function LandingPage() {
     const shrinkEnd = typeof window === "undefined" ? 800 : window.innerHeight * 0.72;
     const p = Math.min(1, Math.max(0, scrollY / shrinkEnd));
     const e = 1 - Math.pow(1 - p, 3);
+    const videoWidth = 100 - e * 36;
     return {
       video: {
-        width: `${100 - e * 36}vw`,
+        width: `${videoWidth}%`,
         height: `${100 - e * 42}vh`,
         top: `${e * 4}vh`,
-        left: `${(100 - (100 - e * 36)) / 2}vw`,
+        left: `${(100 - videoWidth) / 2}%`,
         borderRadius: `${e * 20}px`,
         boxShadow: e > 0.08 ? "0 24px 72px rgba(0,0,0,0.55)" : "none",
       },
@@ -345,15 +346,21 @@ export function LandingPage() {
 }
 
 function LandingNav({ opaque }: { opaque: boolean }) {
+  const ctaLabel = masterclassMode ? "Enroll Masterclass Now" : "Get Started";
+
   return (
     <nav className={`landing-nav ${opaque ? "opaque" : ""}`}>
       <Link href="/" className="landing-logo">Invisible <span>Mechanics</span></Link>
       <div>
-        <a href="#cohort">Cohort</a>
-        <a href="#features">Features</a>
-        <a href="#reviews">Reviews</a>
-        <a href="#faq">FAQ</a>
-        <Link href={loginHref}>Get Started</Link>
+        {!masterclassMode && (
+          <>
+            <a href="#cohort">Cohort</a>
+            <a href="#features">Features</a>
+            <a href="#reviews">Reviews</a>
+            <a href="#faq">FAQ</a>
+          </>
+        )}
+        <Link href={loginHref}>{ctaLabel}</Link>
       </div>
     </nav>
   );

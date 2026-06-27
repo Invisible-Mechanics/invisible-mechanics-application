@@ -69,7 +69,7 @@ export default async function LectureDetailPage({
           {lec.subject ?? "Lecture"}
           {lec.topic ? ` · ${lec.topic}` : ""}
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">{lec.title}</h1>
+        <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">{lec.title}</h1>
         <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
           <span>{recorded.toLocaleDateString()}</span>
           <span>·</span>

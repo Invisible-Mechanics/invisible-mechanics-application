@@ -17,7 +17,7 @@ export default async function AdminCohortsPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex items-end justify-between">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Link href="/admin" className="text-xs text-ink/60 transition-colors hover:text-brand-600">
             ← Back to admin
@@ -42,7 +42,7 @@ export default async function AdminCohortsPage() {
         ) : (
           <ul className="divide-y divide-line rounded-xl border border-line">
             {cohorts.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+              <li key={c.id} className="flex flex-col gap-3 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
                   {c.thumbnail_url && (
                     // eslint-disable-next-line @next/next/no-img-element

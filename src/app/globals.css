@@ -9,10 +9,23 @@
 html,
 body {
   height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   @apply bg-paper text-ink antialiased font-sans;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+* {
+  min-width: 0;
 }
 
 /* Consistent brand focus ring on every interactive element (a11y + premium polish). */
@@ -50,11 +63,19 @@ body.im-landing-shell main {
 }
 
 .landing-page {
-  margin: -2.5rem -1.5rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   background: #fcfcfd;
   color: #0d0d14;
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+
+@supports (overflow: clip) {
+  .landing-page {
+    overflow-x: clip;
+  }
 }
 
 .landing-page a {
@@ -71,6 +92,8 @@ body.im-landing-shell main {
   padding: 15px 60px;
   border-bottom: 1px solid transparent;
   background: transparent;
+  max-width: 100vw;
+  overflow: hidden;
   transition: all 0.35s ease;
 }
 
@@ -832,6 +855,7 @@ body.im-landing-shell main {
 
 .landing-marquee {
   margin-top: 44px;
+  max-width: 100%;
   overflow: hidden;
 }
 
@@ -1028,6 +1052,10 @@ body.im-landing-shell main {
 }
 
 @media (max-width: 900px) {
+  .landing-page {
+    margin: 0;
+  }
+
   .landing-nav {
     padding: 14px 18px;
   }
@@ -1038,6 +1066,27 @@ body.im-landing-shell main {
 
   .landing-nav > div a:not(:last-child) {
     display: none;
+  }
+
+  .landing-logo {
+    font-size: 16px;
+  }
+
+  .landing-hero-copy {
+    top: 60vh;
+  }
+
+  .landing-hero-copy h1 {
+    font-size: clamp(34px, 14vw, 52px);
+  }
+
+  .landing-hero-actions a,
+  .landing-price-row a,
+  .landing-final a {
+    width: 100%;
+    justify-content: center;
+    padding-inline: 18px;
+    text-align: center;
   }
 
   .landing-stats > div,
@@ -1060,6 +1109,60 @@ body.im-landing-shell main {
 
   .landing-stats > div {
     grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .landing-stats strong {
+    font-size: 32px;
+  }
+
+  .landing-section,
+  .landing-feature-section,
+  .landing-mock-section,
+  .landing-reviews,
+  .landing-faq {
+    padding-block: 64px;
+  }
+
+  .landing-cohort-card > div:last-of-type {
+    padding: 28px;
+  }
+
+  .landing-cohort-card h3 {
+    font-size: 30px;
+  }
+
+  .landing-mini-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-mini-stats div {
+    border-right: 0;
+    border-bottom: 1px solid #e8e8f0;
+  }
+
+  .landing-mini-stats div:last-child {
+    border-bottom: 0;
+  }
+
+  .landing-live-panel {
+    min-height: 0;
+  }
+
+  .landing-panel-copy {
+    padding: 22px;
+  }
+
+  .landing-panel-copy h3 {
+    font-size: 26px;
+  }
+
+  .landing-test-top {
+    flex-direction: column;
+  }
+
+  .landing-reviews article {
+    width: min(82vw, 320px);
   }
 
   .landing-classroom {

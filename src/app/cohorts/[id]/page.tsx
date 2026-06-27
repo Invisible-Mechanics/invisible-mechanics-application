@@ -68,7 +68,7 @@ export default async function CohortDetailPage({
 
       <header className="space-y-3">
         <p className="text-xs uppercase tracking-widest text-brand-600">Cohort</p>
-        <h1 className="text-3xl font-semibold tracking-tight">{cohort.title}</h1>
+        <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">{cohort.title}</h1>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {cohort.target_exam && (
             <span className="badge bg-brand-50 text-brand-700">{cohort.target_exam}</span>
@@ -137,8 +137,8 @@ export default async function CohortDetailPage({
         ) : (
           <ul className="divide-y divide-line rounded-xl border border-line">
             {classes.map((c) => (
-              <li key={c.id} className="flex items-center justify-between px-4 py-3">
-                <div>
+              <li key={c.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <Link
                     href={`/classes/${c.id}`}
                     className="font-medium transition-colors hover:text-brand-600"
@@ -160,9 +160,9 @@ export default async function CohortDetailPage({
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between border-b border-line pb-1">
+    <div className="flex flex-col gap-0.5 border-b border-line pb-1 sm:flex-row sm:justify-between">
       <dt className="text-ink/60">{k}</dt>
-      <dd>{v}</dd>
+      <dd className="break-words sm:text-right">{v}</dd>
     </div>
   );
 }

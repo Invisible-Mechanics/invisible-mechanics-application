@@ -72,7 +72,7 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
           {klass.subject ?? "Lecture"}
           {klass.topic ? ` · ${klass.topic}` : ""}
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">{klass.title}</h1>
+        <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">{klass.title}</h1>
         <div className="flex flex-wrap items-center gap-2 text-sm text-ink/70">
           <span>{start.toLocaleString()}</span>
           <span>·</span>
