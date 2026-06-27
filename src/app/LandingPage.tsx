@@ -347,7 +347,7 @@ export function LandingPage() {
 }
 
 function LandingNav({ opaque }: { opaque: boolean }) {
-  const ctaLabel = masterclassMode ? "Enroll Masterclass Now" : "Get Started";
+  const ctaLabel = masterclassMode ? "Enroll Now" : "Get Started";
 
   return (
     <nav className={`landing-nav ${opaque ? "opaque" : ""} ${masterclassMode ? "masterclass" : ""}`}>

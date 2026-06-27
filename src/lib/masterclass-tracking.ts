@@ -16,7 +16,12 @@ function visitorId(): string {
   return id;
 }
 
-async function postEvent(path: string, eventType: "enroll_now_clicked" | "registration_completed", source: string) {
+type MasterclassEventType =
+  | "enroll_now_clicked"
+  | "registration_completed"
+  | "enrollment_confirmed";
+
+async function postEvent(path: string, eventType: MasterclassEventType, source: string) {
   const token = readSessionToken();
   const headers = new Headers({ "Content-Type": "application/json" });
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -41,6 +46,14 @@ export function trackMasterclassRegistrationCompleted(source = "onboarding"): vo
   postEvent(
     "/masterclass/events/registration-completed",
     "registration_completed",
+    source,
+  ).catch(() => {});
+}
+
+export function trackMasterclassEnrollmentConfirmed(source = "masterclass_page"): void {
+  postEvent(
+    "/masterclass/events/enrollment-confirmed",
+    "enrollment_confirmed",
     source,
   ).catch(() => {});
 }

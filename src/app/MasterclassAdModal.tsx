@@ -60,7 +60,7 @@ export function MasterclassAdModal() {
             onClick={enroll}
             className="inline-flex w-full items-center justify-center rounded-md bg-white px-6 py-3 text-base font-semibold text-zinc-950 transition hover:bg-brand-100 sm:w-auto"
           >
-            Enroll Masterclass Now
+            Enroll Now
           </button>
         </div>
       </div>

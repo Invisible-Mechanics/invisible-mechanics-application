@@ -15,10 +15,10 @@ const sans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: `${site.brand.name} - Live Lectures`,
+  title: site.brand.name,
   description: "Live JEE & NEET physics lectures with India's clearest explanations.",
   openGraph: {
-    title: `${site.brand.name} - Live Lectures`,
+    title: site.brand.name,
     description: "Live JEE & NEET physics lectures with India's clearest explanations.",
     siteName: site.brand.name,
     type: "website",

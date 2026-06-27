@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { masterclassThumbnailPath } from "@/lib/masterclass";
+import { trackMasterclassEnrollmentConfirmed } from "@/lib/masterclass-tracking";
 
 const LIVE_AT = new Date("2026-07-06T18:00:00+05:30").getTime();
 
@@ -23,6 +24,10 @@ export function MasterclassPlayer() {
   useEffect(() => {
     const id = window.setInterval(() => setRemaining(LIVE_AT - Date.now()), 1000);
     return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    trackMasterclassEnrollmentConfirmed();
   }, []);
 
   return (
