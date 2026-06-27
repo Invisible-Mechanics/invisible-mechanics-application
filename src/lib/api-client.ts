@@ -1,7 +1,7 @@
 "use client";
 
 import { readSessionToken } from "@/lib/auth-client";
-import type { ClassOut, JoinResponse, UserProfile } from "@/lib/api";
+import type { AdminUserRow, ClassOut, JoinResponse, UserProfile } from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8001";
 
@@ -135,6 +135,39 @@ export async function getMe(): Promise<UserProfile> {
   const r = await authedFetch(`/me`, { method: "GET" });
   if (r.status === 401) throw new Error("unauthenticated");
   if (!r.ok) throw new Error(`getMe failed: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+export async function listAdminUsers(q = ""): Promise<AdminUserRow[]> {
+  const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : "";
+  const r = await authedFetch(`/admin/users${qs}`, { method: "GET" });
+  if (!r.ok) throw new Error(`listAdminUsers failed: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+export async function createAdminUser(payload: {
+  email: string;
+  name?: string | null;
+  phone?: string | null;
+  role: "student" | "admin";
+}): Promise<UserProfile> {
+  const r = await authedFetch(`/admin/users`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error(`createAdminUser failed: ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+export async function updateAdminUserRole(
+  id: string,
+  role: "student" | "admin",
+): Promise<UserProfile> {
+  const r = await authedFetch(`/admin/users/${id}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+  if (!r.ok) throw new Error(`updateAdminUserRole failed: ${r.status} ${await r.text()}`);
   return r.json();
 }
 

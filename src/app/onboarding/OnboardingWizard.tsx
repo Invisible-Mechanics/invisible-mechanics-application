@@ -13,6 +13,7 @@ import type { UserProfile } from "@/lib/api";
 import { OtpField } from "@/components/OtpField";
 import { PhoneField } from "@/components/PhoneField";
 import { site } from "@/lib/site";
+import { masterclassMode, masterclassPath } from "@/lib/masterclass";
 
 type Step = "contact" | "profile";
 type ContactKind = "email" | "phone";
@@ -143,7 +144,7 @@ export function OnboardingWizard() {
           : { accept_terms: true, consent_version: site.policy.legalLastUpdated }),
       });
       await persistSession(res.access_token, res.expires_at);
-      window.location.assign(next);
+      window.location.assign(masterclassMode ? masterclassPath : next);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         setError("Save timed out. Check that the backend is running, then try again.");

@@ -105,6 +105,10 @@ export type UserProfile = {
   consent_version: string | null;
 };
 
+export type AdminUserRow = UserProfile & {
+  created_at: string;
+};
+
 export type JoinResponse = {
   hls_url: string;
   dash_url: string;
@@ -169,6 +173,12 @@ export async function listMyEntitlements(): Promise<EntitlementOut[]> {
 
 export async function getMe(): Promise<UserProfile> {
   const r = await authedFetch(`/me`);
+  return r.json();
+}
+
+export async function listAdminUsers(q = ""): Promise<AdminUserRow[]> {
+  const qs = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : "";
+  const r = await authedFetch(`/admin/users${qs}`);
   return r.json();
 }
 

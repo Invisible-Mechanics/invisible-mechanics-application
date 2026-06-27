@@ -88,7 +88,7 @@ export function RecordingPlayer({
         />
         {watermark && (
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="video-watermark rounded bg-black/30 px-3 py-1 text-xs font-medium text-white/70 shadow">
+            <div className="video-watermark rounded bg-black/10 px-3 py-1 text-xs font-medium text-white/45 shadow-sm">
               {watermark}
             </div>
           </div>

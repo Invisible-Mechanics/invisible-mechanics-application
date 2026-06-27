@@ -1,7 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const PROTECTED_PREFIXES = ["/schedule", "/classes", "/library", "/account", "/admin", "/onboarding"];
+const PROTECTED_PREFIXES = [
+  "/schedule",
+  "/classes",
+  "/library",
+  "/account",
+  "/admin",
+  "/onboarding",
+  "/masterclass",
+];
 const ADMIN_PREFIX = "/admin";
 const ONBOARDING_PATH = "/onboarding";
 const SESSION_COOKIE_NAME = "im_session";

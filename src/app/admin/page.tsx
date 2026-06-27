@@ -33,6 +33,9 @@ export default async function AdminPage() {
           <p className="text-sm text-ink/60">Schedule and manage live lectures.</p>
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/admin/users" className="btn-secondary px-4 py-2 text-sm">
+            Manage users
+          </Link>
           <Link href="/admin/cohorts" className="btn-secondary px-4 py-2 text-sm">
             Manage cohorts
           </Link>
