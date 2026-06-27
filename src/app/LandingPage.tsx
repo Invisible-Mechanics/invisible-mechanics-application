@@ -349,7 +349,7 @@ function LandingNav({ opaque }: { opaque: boolean }) {
   const ctaLabel = masterclassMode ? "Enroll Masterclass Now" : "Get Started";
 
   return (
-    <nav className={`landing-nav ${opaque ? "opaque" : ""}`}>
+    <nav className={`landing-nav ${opaque ? "opaque" : ""} ${masterclassMode ? "masterclass" : ""}`}>
       <Link href="/" className="landing-logo">Invisible <span>Mechanics</span></Link>
       <div>
         {!masterclassMode && (

@@ -1,12 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { masterclassMode, masterclassPath } from "@/lib/masterclass";
 
 export type NavbarUser = { email: string; role: string };
 
 export function Navbar({ user }: { user: NavbarUser | null }) {
+  const pathname = usePathname();
   const isAdmin = user?.role === "admin";
   const isMasterclassStudent = masterclassMode && user?.role === "student";
+  const hideLoggedOutAction = pathname === "/login" || masterclassMode;
 
   return (
     <header className="border-b border-line">
@@ -66,7 +71,7 @@ export function Navbar({ user }: { user: NavbarUser | null }) {
                 </button>
               </form>
             </>
-          ) : (
+          ) : hideLoggedOutAction ? null : (
             <Link href="/login" className="btn-primary px-3 py-1.5 text-sm">
               Log in
             </Link>
