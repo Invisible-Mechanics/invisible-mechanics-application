@@ -19,6 +19,8 @@ export function LoginForm() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState("Sending OTP");
+  const [resendSeconds, setResendSeconds] = useState(0);
 
   useEffect(() => {
     if (readSessionToken()) {
@@ -26,19 +28,29 @@ export function LoginForm() {
     }
   }, [next]);
 
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const id = window.setInterval(() => {
+      setResendSeconds((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [resendSeconds]);
+
   function currentIdentifier(): LoginIdentifier {
     return mode === "email"
       ? { kind: "email", email: email.trim() }
       : { kind: "phone", phone: phone.trim() };
   }
 
-  async function onRequest(e: React.FormEvent) {
-    e.preventDefault();
+  async function requestCode() {
     setError(null);
+    setLoadingLabel("Sending OTP");
     setLoading(true);
     try {
       await requestLogin(currentIdentifier(), next);
+      setCode("");
       setStep("code");
+      setResendSeconds(60);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send code.");
     } finally {
@@ -46,9 +58,15 @@ export function LoginForm() {
     }
   }
 
+  async function onRequest(e: React.FormEvent) {
+    e.preventDefault();
+    await requestCode();
+  }
+
   async function onVerify(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setLoadingLabel("Verifying OTP");
     setLoading(true);
     try {
       const res = await verifyCode(currentIdentifier(), code);
@@ -71,7 +89,7 @@ export function LoginForm() {
   if (step === "code") {
     return (
       <form onSubmit={onVerify} className="space-y-4">
-        {loading && <LoaderModal label="Verifying OTP" />}
+        {loading && <LoaderModal label={loadingLabel} />}
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
           <p className="font-medium text-emerald-900">
             {mode === "email" ? "Check your inbox" : "Check your phone"}
@@ -96,6 +114,14 @@ export function LoginForm() {
         </button>
         <button
           type="button"
+          disabled={loading || resendSeconds > 0}
+          onClick={requestCode}
+          className="block text-xs font-medium text-brand-600 underline disabled:text-ink/40 disabled:no-underline"
+        >
+          {resendSeconds > 0 ? `Resend code in ${resendSeconds}s` : "Resend code"}
+        </button>
+        <button
+          type="button"
           onClick={() => {
             setStep("identifier");
             setCode("");
@@ -112,7 +138,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onRequest} className="space-y-4">
-      {loading && <LoaderModal label="Sending OTP" />}
+      {loading && <LoaderModal label={loadingLabel} />}
       <div className="grid grid-cols-2 gap-2 rounded-lg bg-zinc-100 p-1">
         <button
           type="button"
