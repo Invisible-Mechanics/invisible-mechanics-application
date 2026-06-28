@@ -55,6 +55,15 @@ export function OnboardingWizard() {
 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
+
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const id = window.setInterval(() => {
+      setResendSeconds((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [resendSeconds]);
 
   useEffect(() => {
     let active = true;
@@ -83,8 +92,7 @@ export function OnboardingWizard() {
     };
   }, []);
 
-  async function sendContactCode(e: React.FormEvent) {
-    e.preventDefault();
+  async function requestContactCode() {
     setError(null);
     setBusy(true);
     try {
@@ -92,12 +100,19 @@ export function OnboardingWizard() {
         contactKind === "email" ? { email: email.trim() } : { phone },
       );
       // setDevCode(res.dev_code);
+      setCode("");
       setContactStage("code");
+      setResendSeconds(60);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code.");
     } finally {
       setBusy(false);
     }
+  }
+
+  async function sendContactCode(e: React.FormEvent) {
+    e.preventDefault();
+    await requestContactCode();
   }
 
   async function confirmContact(e: React.FormEvent) {
@@ -211,6 +226,14 @@ export function OnboardingWizard() {
             */}
             <button disabled={busy || code.length !== 6} className="btn-primary w-full px-4 py-2">
               {busy ? "Verifying..." : contactKind === "email" ? "Verify email" : "Verify number"}
+            </button>
+            <button
+              type="button"
+              disabled={busy || resendSeconds > 0}
+              onClick={requestContactCode}
+              className="block text-xs font-medium text-brand-600 underline disabled:text-ink/40 disabled:no-underline"
+            >
+              {resendSeconds > 0 ? `Resend code in ${resendSeconds}s` : "Resend code"}
             </button>
             <button
               type="button"
