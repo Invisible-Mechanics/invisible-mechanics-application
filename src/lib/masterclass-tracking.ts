@@ -1,8 +1,6 @@
 "use client";
 
-import { readSessionToken } from "@/lib/auth-client";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8001";
+const API_URL = "/api/backend";
 const VISITOR_KEY = "im_masterclass_visitor_id";
 
 function visitorId(): string {
@@ -26,9 +24,7 @@ async function postEvent(
   eventType: MasterclassEventType,
   source: string,
 ): Promise<boolean> {
-  const token = readSessionToken();
   const headers = new Headers({ "Content-Type": "application/json" });
-  if (token) headers.set("Authorization", `Bearer ${token}`);
   const response = await fetch(`${API_URL}${path}`, {
     method: "POST",
     headers,

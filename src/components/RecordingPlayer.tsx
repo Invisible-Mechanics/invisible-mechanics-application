@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { StreamPlayback } from "@/lib/api-client";
 import { readSessionIdentity } from "@/lib/auth-client";
 
@@ -25,9 +25,18 @@ export function RecordingPlayer({
   emptyText?: string;
 }) {
   const [state, setState] = useState<State>({ kind: "loading" });
-  const watermark = useMemo(() => {
-    const identity = readSessionIdentity();
-    return [identity?.name, identity?.phone ?? identity?.email].filter(Boolean).join(" | ");
+  const [watermark, setWatermark] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    readSessionIdentity().then((identity) => {
+      if (active) {
+        setWatermark([identity?.name, identity?.phone ?? identity?.email].filter(Boolean).join(" | "));
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ApiError, getClass, listCohorts, type ClassOut, type CohortOut } from "@/lib/api";
+import { ApiError, getAdminClass, listCohorts, type AdminClassOut, type CohortOut } from "@/lib/api";
 import { ErrorState } from "@/components/ErrorState";
 import { EditClassClient } from "./EditClassClient";
 
@@ -12,9 +12,9 @@ export default async function EditClassPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  let klass: ClassOut;
+  let klass: AdminClassOut;
   try {
-    klass = await getClass(id);
+    klass = await getAdminClass(id);
   } catch (e) {
     if (e instanceof ApiError && e.kind === "not_found") notFound();
     if (e instanceof ApiError) {

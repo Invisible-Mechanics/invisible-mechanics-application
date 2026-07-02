@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CohortOut, RecordedLectureOut } from "@/lib/api";
+import type { AdminRecordedLectureOut, CohortOut } from "@/lib/api";
 import { ThumbnailInput } from "@/components/ThumbnailInput";
 
 type FormErrors = {
@@ -48,7 +48,7 @@ export function RecordedLectureForm({
   cohorts = [],
   initialCohortId,
 }: {
-  initial?: RecordedLectureOut;
+  initial?: AdminRecordedLectureOut;
   submitLabel: string;
   onSubmit: (payload: RecordedLecturePayload) => Promise<void>;
   successRedirect?: string;

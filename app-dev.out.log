@@ -1,0 +1,37 @@
+
+> invisible-mechanics-application@0.1.0 dev
+> powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1
+
+[web] 
+[web] > invisible-mechanics-application@0.1.0 dev:web
+[web] > npm --prefix inv-mech run dev:next
+[web] 
+[backend] 
+[backend] > invisible-mechanics-application@0.1.0 dev:backend
+[backend] > cd backend && .venv\Scripts\uvicorn.exe app.main:app --host 0.0.0.0 --port 8001
+[backend] 
+[backend] INFO:     Started server process [17448]
+[backend] INFO:     Waiting for application startup.
+[web] 
+[web] > im-liveclass-web@0.1.0 dev:next
+[web] > next dev
+[web] 
+[backend] INFO:     Application startup complete.
+[backend] INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+[web]    ▲ Next.js 15.5.18
+[web]    - Local:        http://localhost:3000
+[web]    - Network:      http://192.168.1.6:3000
+[web]    - Environments: .env.local
+[web] 
+[web]  ✓ Starting...
+[web]  ✓ Ready in 21.4s
+[backend] INFO:     127.0.0.1:58106 - "GET /health HTTP/1.1" 200 OK
+[web]  ○ Compiling /middleware ...
+[backend] INFO:     127.0.0.1:58111 - "GET /classes HTTP/1.1" 200 OK
+[web]  ✓ Compiled /middleware in 2.3s (195 modules)
+[web]  ○ Compiling /library ...
+[web]  ✓ Compiled /library in 25.9s (777 modules)
+[backend] INFO:     127.0.0.1:60766 - "GET /lectures HTTP/1.1" 200 OK
+[web]  GET /library 200 in 64019ms
+[web] [?25h
+[web] npm run dev:web exited with code 0

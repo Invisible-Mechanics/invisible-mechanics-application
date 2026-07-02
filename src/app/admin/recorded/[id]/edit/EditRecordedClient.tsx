@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { CohortOut, RecordedLectureOut } from "@/lib/api";
+import type { AdminRecordedLectureOut, CohortOut } from "@/lib/api";
 import { RecordedLectureForm } from "@/app/admin/_components/RecordedLectureForm";
 import { deleteRecordedLecture, updateRecordedLecture } from "@/lib/api-client";
 
@@ -10,7 +10,7 @@ export function EditRecordedClient({
   initial,
   cohorts,
 }: {
-  initial: RecordedLectureOut;
+  initial: AdminRecordedLectureOut;
   cohorts: CohortOut[];
 }) {
   const router = useRouter();

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ClassOut, CohortOut } from "@/lib/api";
+import type { AdminClassOut, CohortOut } from "@/lib/api";
 import { ClassForm } from "@/app/admin/_components/ClassForm";
 import { RecordingUpload } from "./RecordingUpload";
 import { StatusOverridePanel } from "./StatusOverridePanel";
@@ -13,7 +13,7 @@ export function EditClassClient({
   initial,
   cohorts,
 }: {
-  initial: ClassOut;
+  initial: AdminClassOut;
   cohorts: CohortOut[];
 }) {
   const router = useRouter();

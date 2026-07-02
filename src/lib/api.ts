@@ -30,7 +30,6 @@ export type ClassOut = {
   access_type: "free" | "paid";
   cohort_id: string;
   price_single: string | null;
-  stream_video_uid: string | null;
   status: "scheduled" | "live" | "ended";
   thumbnail_url: string | null;
   target_exam: "jee" | "neet" | null;
@@ -65,11 +64,13 @@ export type RecordedLectureOut = {
   access_type: "free" | "paid";
   cohort_id: string;
   price_single: string | null;
-  stream_video_uid: string;
   thumbnail_url: string | null;
   target_exam: "jee" | "neet" | null;
   target_year: number | null;
 };
+
+export type AdminClassOut = ClassOut & { stream_video_uid: string | null };
+export type AdminRecordedLectureOut = RecordedLectureOut & { stream_video_uid: string };
 
 export type ChapterOut = {
   id: string;
@@ -171,6 +172,11 @@ export async function listMyEntitlements(): Promise<EntitlementOut[]> {
   return r.json();
 }
 
+export async function getAdminClass(id: string): Promise<AdminClassOut> {
+  const r = await authedFetch(`/admin/classes/${id}`);
+  return r.json();
+}
+
 export async function getMe(): Promise<UserProfile> {
   const r = await authedFetch(`/me`);
   return r.json();
@@ -197,6 +203,11 @@ export async function listRecordedLectures(
 
 export async function getRecordedLecture(id: string): Promise<RecordedLectureOut> {
   const r = await authedFetch(`/lectures/${id}`);
+  return r.json();
+}
+
+export async function getAdminRecordedLecture(id: string): Promise<AdminRecordedLectureOut> {
+  const r = await authedFetch(`/admin/recorded-lectures/${id}`);
   return r.json();
 }
 

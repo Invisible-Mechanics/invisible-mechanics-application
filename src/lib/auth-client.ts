@@ -1,8 +1,6 @@
 "use client";
 
-import { SESSION_COOKIE_NAME } from "@/lib/session-constants";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8001";
+const API_URL = "/api/backend";
 
 export type VerifyResponse = {
   access_token: string;
@@ -31,7 +29,10 @@ export async function requestLogin(identifier: LoginIdentifier, next?: string): 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...identifierPayload(identifier), next }),
   });
-  if (!r.ok) throw new Error(`request failed: ${r.status}`);
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(body.detail ?? body.message ?? "Could not send the code.");
+  }
 }
 
 /** Verify a 6-digit code against the backend; on success, persists the cookie. */
@@ -69,34 +70,28 @@ export async function persistSession(accessToken: string, expiresAt: string): Pr
   if (!r.ok) throw new Error("could not save session");
 }
 
-/** Browser-side read of the session JWT (used by api-client to stamp headers). */
-export function readSessionToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const target = `${SESSION_COOKIE_NAME}=`;
-  for (const part of document.cookie.split(";")) {
-    const c = part.trim();
-    if (c.startsWith(target)) return decodeURIComponent(c.slice(target.length));
-  }
-  return null;
-}
-
 export type SessionIdentity = {
   email: string | null;
   phone: string | null;
   name: string | null;
 };
 
-export function readSessionIdentity(): SessionIdentity | null {
-  const token = readSessionToken();
-  if (!token) return null;
+export async function readSessionIdentity(): Promise<SessionIdentity | null> {
   try {
-    const payload = JSON.parse(atob(token.split(".")[1] ?? ""));
-    return {
-      email: typeof payload.email === "string" ? payload.email : null,
-      phone: typeof payload.phone === "string" ? payload.phone : null,
-      name: typeof payload.name === "string" ? payload.name : null,
-    };
+    const response = await fetch("/api/session", { cache: "no-store" });
+    if (!response.ok) return null;
+    const payload = (await response.json()) as SessionIdentity;
+    return { email: payload.email, phone: payload.phone, name: payload.name };
   } catch {
     return null;
+  }
+}
+
+export async function hasSession(): Promise<boolean> {
+  try {
+    const response = await fetch("/api/session", { cache: "no-store" });
+    return response.ok;
+  } catch {
+    return false;
   }
 }

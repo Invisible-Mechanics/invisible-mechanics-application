@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/session";
+import { getSession, SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/session";
 
 type SetBody = { access_token?: string; expires_at?: string };
 
@@ -19,13 +19,24 @@ export async function POST(request: Request) {
 
   const store = await cookies();
   store.set(SESSION_COOKIE_NAME, token, {
-    httpOnly: false,
+    httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge,
   });
   return NextResponse.json({ ok: true });
+}
+
+export async function GET() {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ authenticated: false }, { status: 401 });
+  return NextResponse.json({
+    authenticated: true,
+    email: session.email,
+    phone: session.phone,
+    name: session.name,
+  });
 }
 
 export async function DELETE() {

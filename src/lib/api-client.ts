@@ -1,14 +1,11 @@
 "use client";
 
-import { readSessionToken } from "@/lib/auth-client";
-import type { AdminUserRow, ClassOut, JoinResponse, UserProfile } from "@/lib/api";
+import type { AdminClassOut, AdminUserRow, JoinResponse, UserProfile } from "@/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8001";
+const API_URL = "/api/backend";
 
 async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  const token = readSessionToken();
   const headers = new Headers(init.headers);
-  if (token) headers.set("Authorization", `Bearer ${token}`);
   headers.set("Content-Type", "application/json");
   return fetch(`${API_URL}${path}`, { ...init, headers });
 }
@@ -58,7 +55,7 @@ export async function updateClass(
 export async function updateClassStatus(
   id: string,
   status: "scheduled" | "live" | "ended",
-): Promise<ClassOut> {
+): Promise<AdminClassOut> {
   const r = await authedFetch(`/admin/classes/${id}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
@@ -263,7 +260,7 @@ export type StreamPlayback = {
 export async function attachRecording(
   classId: string,
   streamVideoUid: string,
-): Promise<ClassOut> {
+): Promise<AdminClassOut> {
   const r = await authedFetch(`/admin/classes/${classId}/recording`, {
     method: "PUT",
     body: JSON.stringify({ stream_video_uid: streamVideoUid }),
@@ -273,7 +270,7 @@ export async function attachRecording(
 }
 
 /** Ask the backend to auto-attach the latest Stream recording for this live input. */
-export async function attachRecordingFromLiveInput(classId: string): Promise<ClassOut> {
+export async function attachRecordingFromLiveInput(classId: string): Promise<AdminClassOut> {
   const r = await authedFetch(
     `/admin/classes/${classId}/recording/attach-from-live-input`,
     { method: "POST" },

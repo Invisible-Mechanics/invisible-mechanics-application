@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: im-liveclass-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: im
+      POSTGRES_PASSWORD: im
+      POSTGRES_DB: im_liveclass
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U im -d im_liveclass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

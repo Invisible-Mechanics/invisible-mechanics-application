@@ -2,10 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   ApiError,
-  getRecordedLecture,
+  getAdminRecordedLecture,
   listCohorts,
   type CohortOut,
-  type RecordedLectureOut,
+  type AdminRecordedLectureOut,
 } from "@/lib/api";
 import { ErrorState } from "@/components/ErrorState";
 import { EditRecordedClient } from "./EditRecordedClient";
@@ -18,9 +18,9 @@ export default async function EditRecordedLecturePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  let lecture: RecordedLectureOut;
+  let lecture: AdminRecordedLectureOut;
   try {
-    lecture = await getRecordedLecture(id);
+    lecture = await getAdminRecordedLecture(id);
   } catch (e) {
     if (e instanceof ApiError && e.kind === "not_found") notFound();
     if (e instanceof ApiError) {

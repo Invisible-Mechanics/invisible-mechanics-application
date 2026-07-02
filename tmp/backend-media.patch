@@ -1,0 +1,158 @@
+diff --git a/tmp/backend-base/app/schemas.py b/tmp/backend-working/app/schemas.py
+index 494d701..dd1f184 100644
+--- a/tmp/backend-base/app/schemas.py
++++ b/tmp/backend-working/app/schemas.py
+@@ -215,13 +215,16 @@ class ClassOut(_ORM):
+     access_type: Literal["free", "paid"]
+     cohort_id: uuid.UUID
+     price_single: Decimal | None
+-    stream_video_uid: str | None
+     status: Literal["scheduled", "live", "ended"]
+     thumbnail_url: str | None
+     target_exam: Literal["jee", "neet"] | None
+     target_year: int | None
+ 
+ 
++class AdminClassOut(ClassOut):
++    stream_video_uid: str | None
++
++
+ class ClassCreate(BaseModel):
+     title: str = Field(min_length=1, max_length=200)
+     description: str | None = None
+@@ -357,12 +360,15 @@ class RecordedLectureOut(_ORM):
+     access_type: Literal["free", "paid"]
+     cohort_id: uuid.UUID
+     price_single: Decimal | None
+-    stream_video_uid: str
+     thumbnail_url: str | None
+     target_exam: Literal["jee", "neet"] | None
+     target_year: int | None
+ 
+ 
++class AdminRecordedLectureOut(RecordedLectureOut):
++    stream_video_uid: str
++
++
+ class RecordedLectureCreate(BaseModel):
+     title: str = Field(min_length=1, max_length=200)
+     description: str | None = None
+diff --git a/tmp/backend-base/app/routers/admin.py b/tmp/backend-working/app/routers/admin.py
+index e3e9abd..0a2f47b 100644
+--- a/tmp/backend-base/app/routers/admin.py
++++ b/tmp/backend-working/app/routers/admin.py
+@@ -12,8 +12,8 @@ from app.schemas import (
+     AdminUserCreate,
+     AdminUserRow,
+     AdminUserRoleUpdate,
++    AdminClassOut,
+     ClassCreate,
+-    ClassOut,
+     ClassStatusUpdate,
+     ClassUpdate,
+     CohortCreate,
+@@ -90,7 +90,7 @@ async def update_user_role(
+     return user
+ 
+ 
+-@router.post("/classes", response_model=ClassOut, status_code=201)
++@router.post("/classes", response_model=AdminClassOut, status_code=201)
+ async def create_class(
+     body: ClassCreate,
+     db: AsyncSession = Depends(get_db),
+@@ -123,7 +123,15 @@ async def create_class(
+     return klass
+ 
+ 
+-@router.patch("/classes/{class_id}/status", response_model=ClassOut)
++@router.get("/classes/{class_id}", response_model=AdminClassOut)
++async def get_admin_class(class_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> Class:
++    klass = await db.get(Class, class_id)
++    if klass is None:
++        raise HTTPException(status_code=404, detail="lecture not found")
++    return klass
++
++
++@router.patch("/classes/{class_id}/status", response_model=AdminClassOut)
+ async def update_class_status(
+     class_id: uuid.UUID,
+     body: ClassStatusUpdate,
+@@ -138,7 +146,7 @@ async def update_class_status(
+     return klass
+ 
+ 
+-@router.patch("/classes/{class_id}", response_model=ClassOut)
++@router.patch("/classes/{class_id}", response_model=AdminClassOut)
+ async def update_class(
+     class_id: uuid.UUID,
+     body: ClassUpdate,
+@@ -265,7 +273,7 @@ async def delete_cohort(
+ # ---------- Recording admin (live classes) ----------
+ 
+ 
+-@router.put("/classes/{class_id}/recording", response_model=ClassOut)
++@router.put("/classes/{class_id}/recording", response_model=AdminClassOut)
+ async def attach_recording(
+     class_id: uuid.UUID,
+     body: RecordingAttach,
+@@ -283,7 +291,7 @@ async def attach_recording(
+ 
+ @router.post(
+     "/classes/{class_id}/recording/attach-from-live-input",
+-    response_model=ClassOut,
++    response_model=AdminClassOut,
+ )
+ async def attach_recording_from_live_input(
+     class_id: uuid.UUID,
+diff --git a/tmp/backend-base/app/routers/admin_recorded.py b/tmp/backend-working/app/routers/admin_recorded.py
+index c61fc17..2971532 100644
+--- a/tmp/backend-base/app/routers/admin_recorded.py
++++ b/tmp/backend-working/app/routers/admin_recorded.py
+@@ -8,8 +8,8 @@ from app.auth import require_admin
+ from app.db import get_db
+ from app.models import Cohort, RecordedLecture, User
+ from app.schemas import (
++    AdminRecordedLectureOut,
+     RecordedLectureCreate,
+-    RecordedLectureOut,
+     RecordedLectureUpdate,
+ )
+ 
+@@ -20,7 +20,7 @@ router = APIRouter(
+ )
+ 
+ 
+-@router.get("", response_model=list[RecordedLectureOut])
++@router.get("", response_model=list[AdminRecordedLectureOut])
+ async def list_recorded_lectures(
+     db: AsyncSession = Depends(get_db),
+     _: User = Depends(require_admin),
+@@ -29,7 +29,18 @@ async def list_recorded_lectures(
+     return list((await db.execute(stmt)).scalars().all())
+ 
+ 
+-@router.post("", response_model=RecordedLectureOut, status_code=201)
++@router.get("/{lecture_id}", response_model=AdminRecordedLectureOut)
++async def get_recorded_lecture(
++    lecture_id: uuid.UUID,
++    db: AsyncSession = Depends(get_db),
++) -> RecordedLecture:
++    lecture = await db.get(RecordedLecture, lecture_id)
++    if lecture is None:
++        raise HTTPException(status_code=404, detail="recorded lecture not found")
++    return lecture
++
++
++@router.post("", response_model=AdminRecordedLectureOut, status_code=201)
+ async def create_recorded_lecture(
+     body: RecordedLectureCreate,
+     db: AsyncSession = Depends(get_db),
+@@ -45,7 +56,7 @@ async def create_recorded_lecture(
+     return lecture
+ 
+ 
+-@router.patch("/{lecture_id}", response_model=RecordedLectureOut)
++@router.patch("/{lecture_id}", response_model=AdminRecordedLectureOut)
+ async def update_recorded_lecture(
+     lecture_id: uuid.UUID,
+     body: RecordedLectureUpdate,

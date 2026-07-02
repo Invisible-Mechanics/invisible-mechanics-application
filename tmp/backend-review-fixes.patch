@@ -1,0 +1,165 @@
+diff --git a/app/config.py b/app/config.py
+--- a/app/config.py
++++ b/app/config.py
+@@ -19,6 +19,8 @@ class Settings(BaseSettings):
+     magic_link_ttl_min: int = 15
+     # How long a session JWT (cookie) stays valid after verify.
+     session_ttl_hours: int = 2
++    # Never expose OTPs unless a developer opts in explicitly.
++    expose_dev_codes: bool = False
+ 
+     web_origin: str = "http://localhost:3000"
+diff --git a/app/routers/auth.py b/app/routers/auth.py
+--- a/app/routers/auth.py
++++ b/app/routers/auth.py
+@@ -41,6 +41,7 @@ MIN_RESEND_INTERVAL_SEC = 30
+ # Max wrong-code submissions per outstanding token before it's burned.
+ MAX_CODE_ATTEMPTS = 5
++MAX_REQUESTS_PER_HOUR = 10
+@@ -87,7 +88,7 @@ async def _send_login_email(
+     token: str,
+     code: str,
+     next_path: str | None,
+-) -> None:
++) -> bool:
+@@ -108,6 +109,8 @@ async def _send_login_email(
+     )
+     if not result.ok:
+         logger.warning("login email send failed to=%s error=%s", to, result.error)
++        return False
++    return True
+@@ -148,6 +151,18 @@ async def request_login(
+     next_path = _safe_next(body.next)
+     now = datetime.now(UTC)
+ 
++    hourly_count = (
++        await db.execute(
++            select(AuthToken.id)
++            .where(AuthToken.phone == phone if is_sms else AuthToken.email == email)
++            .where(AuthToken.channel == ("sms" if is_sms else "email"))
++            .where(AuthToken.created_at >= now - timedelta(hours=1))
++        )
++    ).scalars().all()
++    if len(hourly_count) >= MAX_REQUESTS_PER_HOUR:
++        raise HTTPException(status_code=429, detail="too many OTP requests; try again later")
++
+@@ -225,14 +240,18 @@ async def request_login(
+             return failure
+     else:
+-        await _send_login_email(
++        sent = await _send_login_email(
+             email_client,
+             to=email,
+             token=token,
+             code=code,
+             next_path=next_path,
+         )
+-    return LoginRequestOut(dev_code=code)
++        if not sent:
++            row.consumed_at = datetime.now(UTC)
++            await db.commit()
++            raise HTTPException(status_code=502, detail="could not send the code, try again")
++    return LoginRequestOut(dev_code=code if settings.expose_dev_codes else None)
+diff --git a/app/routers/me.py b/app/routers/me.py
+--- a/app/routers/me.py
++++ b/app/routers/me.py
+@@ -239,8 +239,10 @@ async def request_contact_otp(
+         if failure is not None:
+             raise HTTPException(status_code=502, detail="could not send the code, try again")
+     else:
+-        await _send_login_email(email_client, to=email, token=token, code=code, next_path=None)
+-    return ContactOtpRequestOut(dev_code=code)
++        sent = await _send_login_email(email_client, to=email, token=token, code=code, next_path=None)
++        if not sent:
++            raise HTTPException(status_code=502, detail="could not send the code, try again")
++    return ContactOtpRequestOut(dev_code=code if settings.expose_dev_codes else None)
+diff --git a/app/services/enrollment.py b/app/services/enrollment.py
+--- a/app/services/enrollment.py
++++ b/app/services/enrollment.py
+@@ -97,6 +97,17 @@ async def grant_entitlement(db: AsyncSession, payment: Payment) -> None:
+         raise ValueError(f"unknown payment scope_type: {payment.scope_type}")
+ 
+ 
++async def _record_entitlement_grant(db: AsyncSession, payment: Payment) -> None:
++    await record_payment_event_best_effort(
++        db,
++        payment=payment,
++        event_type="entitlement_granted",
++        source="system",
++        payload={"scope_type": payment.scope_type, "scope_id": str(payment.scope_id)},
++    )
++
++
+ async def grant_cohort_entitlement(db: AsyncSession, payment: Payment) -> None:
+@@ -145,6 +156,7 @@ async def grant_cohort_entitlement(db: AsyncSession, payment: Payment) -> None:
+         await db.rollback()
+         payment.status = "paid"
+         await db.commit()
++    await _record_entitlement_grant(db, payment)
+@@ -172,6 +184,7 @@ async def grant_class_entitlement(db: AsyncSession, payment: Payment) -> None:
+         await db.rollback()
+         payment.status = "paid"
+         await db.commit()
++    await _record_entitlement_grant(db, payment)
+@@ -199,24 +212,4 @@ async def grant_recorded_lecture_entitlement(db: AsyncSession, payment: Payment)
+         await db.rollback()
+         payment.status = "paid"
+         await db.commit()
+-    await record_payment_event_best_effort(
+-        db,
+-        payment=payment,
+-        event_type="entitlement_granted",
+-        source="system",
+-        payload={"scope_type": "recorded_lecture", "scope_id": str(payment.scope_id)},
+-    )
+-    await record_payment_event_best_effort(
+-        db,
+-        payment=payment,
+-        event_type="entitlement_granted",
+-        source="system",
+-        payload={"scope_type": "class", "scope_id": str(payment.scope_id)},
+-    )
+-    await record_payment_event_best_effort(
+-        db,
+-        payment=payment,
+-        event_type="entitlement_granted",
+-        source="system",
+-        payload={"scope_type": "cohort", "scope_id": str(payment.scope_id)},
+-    )
++    await _record_entitlement_grant(db, payment)
+diff --git a/app/routers/enrollments.py b/app/routers/enrollments.py
+--- a/app/routers/enrollments.py
++++ b/app/routers/enrollments.py
+@@ -326,6 +326,12 @@ async def verify_payment(
+     if payment.user_id != user.id:
+         raise HTTPException(status_code=403, detail="order does not belong to you")
+ 
++    if (
++        payment.status == "paid"
++        and payment.razorpay_payment_id
++        and payment.razorpay_payment_id != body.razorpay_payment_id
++    ):
++        raise HTTPException(status_code=409, detail="order already paid with another payment")
+     was_paid = payment.status == "paid"
+@@ -350,9 +356,7 @@ async def razorpay_webhook(
+ 
+     secret = get_settings().razorpay_webhook_secret
+     if not secret:
+-        # No webhook configured yet (pre-dashboard window). Ignore safely.
+-        return {"ok": False, "reason": "webhook secret not configured"}
++        raise HTTPException(status_code=503, detail="webhook secret not configured")
+@@ -359,7 +363,10 @@ async def razorpay_webhook(
+     if not verify_webhook_signature(raw_body=raw, signature=signature, secret=secret):
+         raise HTTPException(status_code=400, detail="invalid webhook signature")
+ 
+-    event = json.loads(raw)
++    try:
++        event = json.loads(raw)
++    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
++        raise HTTPException(status_code=400, detail="invalid webhook body") from exc
+diff --git a/tests/conftest.py b/tests/conftest.py
+--- a/tests/conftest.py
++++ b/tests/conftest.py
+@@ -17,6 +17,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+ os.environ.setdefault("APP_JWT_SECRET", "test-secret")
++os.environ.setdefault("EXPOSE_DEV_CODES", "true")

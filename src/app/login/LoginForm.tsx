@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { LoaderModal } from "@/components/LoaderModal";
-import { LoginIdentifier, readSessionToken, requestLogin, verifyCode } from "@/lib/auth-client";
+import { hasSession, LoginIdentifier, requestLogin, verifyCode } from "@/lib/auth-client";
 
 type LoginMode = "email" | "phone";
 type LoginStep = "identifier" | "code";
@@ -23,9 +23,13 @@ export function LoginForm() {
   const [resendSeconds, setResendSeconds] = useState(0);
 
   useEffect(() => {
-    if (readSessionToken()) {
-      window.location.replace(next);
-    }
+    let active = true;
+    hasSession().then((authenticated) => {
+      if (active && authenticated) window.location.replace(next);
+    });
+    return () => {
+      active = false;
+    };
   }, [next]);
 
   useEffect(() => {

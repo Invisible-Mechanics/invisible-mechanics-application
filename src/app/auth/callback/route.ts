@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(`${origin}${destination}`);
   const maxAge = Math.max(0, Math.floor((Date.parse(data.expires_at) - Date.now()) / 1000));
   response.cookies.set(SESSION_COOKIE_NAME, data.access_token, {
-    httpOnly: false,
+    httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
   // Cookie is also set in the response store for completeness.
   const store = await cookies();
   store.set(SESSION_COOKIE_NAME, data.access_token, {
-    httpOnly: false,
+    httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",

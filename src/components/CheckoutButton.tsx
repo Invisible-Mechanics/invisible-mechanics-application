@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
-import { readSessionToken } from "@/lib/auth-client";
+import { hasSession } from "@/lib/auth-client";
 import {
   createCohortOrder,
   createClassOrder,
@@ -43,7 +43,7 @@ export function CheckoutButton({
   async function onClick() {
     setError(null);
 
-    if (!readSessionToken()) {
+    if (!(await hasSession())) {
       router.push(`/login?next=${loginNext}`);
       return;
     }
