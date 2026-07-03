@@ -4,6 +4,7 @@
 
 :root {
   color-scheme: light;
+  --font-sans: "Plus Jakarta Sans", "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 html,

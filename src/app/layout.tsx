@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "./Navbar";
 import { getSession } from "@/lib/session";
 import { site } from "@/lib/site";
 import "./globals.css";
-
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
@@ -30,7 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const navUser = session ? { email: session.email, role: session.role } : null;
 
   return (
-    <html lang="en" className={sans.variable}>
+    <html lang="en">
       <body>
         <Navbar user={navUser} />
         <main className="mx-auto w-full max-w-5xl overflow-x-hidden px-4 py-6 sm:px-6 sm:py-10">{children}</main>
